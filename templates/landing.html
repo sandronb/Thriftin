@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ThriftIn — Thrift Sat-Set Tanpa Ongkir</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --red:      #7B1113;
+        --red-dark: #5E0006;
+        --cream:    #FDF8F3;
+        --dark:     #1a1a1a;
+        --gray:     #6b7280;
+        --border:   #e8e3dd;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fff; color: var(--dark); overflow-x: hidden; }
+
+    /* ══════════════════════════════
+       NAVBAR
+    ══════════════════════════════ */
+    .topnav {
+        position: sticky; top: 0; z-index: 200;
+        background: rgba(255,255,255,0.96);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 14px 0;
+    }
+    .nav-inner {
+        max-width: 1200px; margin: auto;
+        padding: 0 40px;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-logo-img { 
+        width: 40px; height: 40px; 
+        border-radius: 8px; 
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+    .brand-name { font-family: 'Bree Serif', serif; font-size: 1.5rem; color: var(--red-dark); line-height: 1; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .btn-login {
+        background: none; border: none; color: #444; font-weight: 600;
+        font-size: 0.88rem; padding: 9px 18px; cursor: pointer;
+        text-decoration: none; border-radius: 8px; transition: all 0.2s;
+    }
+    .btn-login:hover { background: var(--cream); color: var(--red); }
+    .btn-register {
+        background: var(--red); color: #fff; font-weight: 700;
+        font-size: 0.88rem; padding: 10px 24px; border-radius: 99px;
+        text-decoration: none; border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-register:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(123,17,19,0.35); }
+
+    /* ══════════════════════════════
+       HERO — full width, pixel-scale
+       FIX 1: hero-scaler tidak pakai max-width,
+               langsung 100vw supaya merah sentuh tepi
+    ══════════════════════════════ */
+    .hero-scaler {
+        position: relative;
+        width: 100%;                          /* ← full width halaman */
+        padding-bottom: calc(496 / 1440 * 100%);
+        overflow: hidden;
+        background: #5E0006;                  /* fallback warna */
+    }
+    .hero-inner {
+        position: absolute;
+        top: 0; left: 0;
+        width: 1440px; height: 496px;
+        transform-origin: top left;
+        background: #5E0006;
+    }
+
+    /* Lingkaran dekoratif */
+    .hero-ellipse {
+        position: absolute; border-radius: 50%;
+        border: 5px solid rgba(255,255,255,0.35);
+        box-sizing: border-box;
+    }
+    /* Group 3 — tengah kanan */
+    .el-3-1 { width:242px; height:242px; left:686px; top:-40px; }
+    .el-3-2 { width:182px; height:182px; left:716px; top:-10px; }
+    .el-3-3 { width:107px; height:107px; left:753px; top: 27px; }
+    /* Group 4 — kanan bawah */
+    .el-4-1 { width:242px; height:242px; left:1200px; top:351px; }
+    .el-4-2 { width:182px; height:182px; left:1230px; top:381px; }
+    .el-4-3 { width:107px; height:107px; left:1267px; top:418px; }
+    /* Group 5 — tengah bawah */
+    .el-5-1 { width:242px; height:242px; left:686px; top:248px; }
+    .el-5-2 { width:182px; height:182px; left:716px; top:278px; }
+    .el-5-3 { width:107px; height:107px; left:753px; top:315px; }
+
+    /* Teks konten hero */
+    .hero-content {
+        position: absolute;
+        display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+        width: 363px; left: 91px; top: 118px;
+    }
+    .hero-h1 {
+        font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 40px;
+        line-height: 150%; color: #fff; margin: 0; width: 363px;
+    }
+    .hero-sub {
+        font-family: 'Poppins', sans-serif; font-weight: 400; font-size: 14px;
+        line-height: 150%; color: rgba(255,255,255,0.9); margin: 0; width: 343px;
+    }
+    .hero-cta { display: flex; flex-direction: row; align-items: center; gap: 16px; }
+    .btn-solid {
+        display: flex; justify-content: center; align-items: center;
+        padding: 14px 24px; width: 143px; height: 49px;
+        background: #fff; box-shadow: 0px 1px 2px rgba(0,0,0,0.05);
+        border-radius: 15px; font-family: 'Poppins', sans-serif;
+        font-weight: 700; font-size: 14px; color: #5E0006;
+        text-decoration: none; border: none; cursor: pointer;
+        white-space: nowrap; transition: opacity 0.2s;
+    }
+    .btn-solid:hover { opacity: 0.88; color: #5E0006; }
+    .btn-outline-hero {
+        display: flex; justify-content: center; align-items: center;
+        padding: 14px 24px; width: 143px; height: 49px;
+        border: 1.5px solid #fff; border-radius: 15px;
+        font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px;
+        color: #fff; text-decoration: none; background: transparent;
+        white-space: nowrap; transition: background 0.2s;
+    }
+    .btn-outline-hero:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* Hero image — 550×823, left 791, top 76 */
+    .hero-img-wrap {
+        position: absolute;
+        width: 550px; height: 823px;
+        left: 791px; top: 76px;
+        border-radius: 20px; overflow: hidden;
+        background: rgba(255,255,255,0.08);
+    }
+    .hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* ══════════════════════════════
+       WHAT IS IT
+    ══════════════════════════════ */
+    .what-is { padding: 80px 40px; background: #fff; }
+    .what-inner { max-width: 1200px; margin: auto; }
+    .sec-label {
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.12em; color: var(--red); margin-bottom: 10px; display: block;
+    }
+    .sec-h2 { font-size: 2rem; font-weight: 800; color: var(--dark); margin-bottom: 14px; letter-spacing: -0.5px; }
+    .sec-sub { font-size: 0.92rem; color: var(--gray); margin-bottom: 48px; max-width: 500px; line-height: 1.7; }
+
+    /* ══════════════════════════════
+       MOSAIC — pixel exact Figma, scale JS
+    ══════════════════════════════ */
+    .mosaic-scaler {
+        position: relative;
+        width: 100%;
+        padding-bottom: calc(674 / 1065 * 100%);
+        overflow: hidden;
+    }
+    .mosaic-inner {
+        position: absolute; top: 0; left: 0;
+        width: 1065px; height: 674px;
+        transform-origin: top left;
+    }
+    .ms {
+        position: absolute; border-radius: 20px; overflow: hidden;
+        background: var(--cream); border: 2px solid var(--border);
+        transition: filter 0.2s;
+    }
+    .ms:hover { filter: brightness(0.92); }
+    .ms img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Koordinat pixel exact dari Figma */
+    .ms-r20 { left:   0px; top:   0px; width:188px; height:196px; }
+    .ms-r21 { left:   0px; top: 216px; width:188px; height:458px; }
+    .ms-r16 { left: 211px; top:   0px; width:314px; height:512px; }
+    .ms-r19 { left: 211px; top: 534px; width:314px; height:140px; }
+    .ms-r17 { left: 540px; top:   0px; width:314px; height:251px; }
+    .ms-r18 { left: 540px; top: 262px; width:314px; height:412px; }
+    .ms-r22 { left: 877px; top:   0px; width:188px; height:458px; }
+    .ms-r23 { left: 877px; top: 478px; width:188px; height:196px; }
+
+    /*
+       FIX 2: Mosaic fade diperlebar — cover seluruh lebar (0 → 1065px)
+       bukan hanya kolom tengah
+    */
+    .mosaic-fade {
+        position: absolute;
+        left: 0; bottom: 0;
+        width: 1065px; height: 220px;    /* ← full lebar mosaic */
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 85%);
+        pointer-events: none;
+    }
+
+    /* ══════════════════════════════
+       HOW TO
+    ══════════════════════════════ */
+    .how-to { padding: 80px 40px; background: var(--cream); }
+    .how-inner { max-width: 1200px; margin: auto; }
+    .how-header { margin-bottom: 48px; }
+    .step-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .step-card {
+        background: #fff; border-radius: 16px; padding: 36px 28px;
+        border: 1px solid var(--border); transition: all 0.3s;
+        position: relative; overflow: hidden;
+    }
+    .step-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: var(--red); transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+    .step-card:hover::before { transform: scaleX(1); }
+    .step-num { font-size: 0.7rem; font-weight: 800; color: var(--red); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+    .step-icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 20px; }
+    .icon-loc  { background: #E8F5EE; }
+    .icon-chat { background: #EAF2FF; }
+    .icon-deal { background: #FEF6E4; }
+    .step-h3 { font-size: 1.05rem; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+    .step-p  { font-size: 0.87rem; color: var(--gray); line-height: 1.7; }
+
+    /* ══════════════════════════════
+       FACT
+    ══════════════════════════════ */
+    .fact { padding: 80px 40px; background: #fff; }
+    .fact-inner { max-width: 1200px; margin: auto; }
+    .fact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; margin-top: 48px; }
+    .fact-list { list-style: none; }
+    .fact-list li {
+        display: flex; gap: 14px; align-items: flex-start;
+        padding: 16px 0; border-bottom: 1px solid var(--border);
+        font-size: 0.9rem; color: #444; line-height: 1.6;
+    }
+    .fact-list li:last-child { border-bottom: none; }
+    .fact-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; margin-top: 7px; }
+    .fact-box {
+        background: var(--red); border-radius: 20px; padding: 44px 40px;
+        position: relative; overflow: hidden;
+    }
+    .fact-box::before {
+        content: ''; position: absolute; bottom: -60px; right: -60px;
+        width: 200px; height: 200px; border: 40px solid rgba(255,255,255,0.08); border-radius: 50%;
+    }
+    .fact-box-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); margin-bottom: 12px; display: block; }
+    .fact-box-h2    { font-size: 1.6rem; font-weight: 800; color: white; line-height: 1.3; margin-bottom: 12px; }
+    .fact-box-sub   { font-size: 0.88rem; color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.7; }
+    .fact-box-btns  { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* ══════════════════════════════
+       FOOTER
+    ══════════════════════════════ */
+    footer {
+        background: #5E0006;
+        padding: 48px 40px;
+        width: 100%;
+    }
+    .footer-inner {
+        max-width: 700px; margin: auto;
+        display: flex; flex-direction: column;
+        align-items: center; gap: 6px;
+        text-align: center;
+    }
+    .footer-copy { color: rgba(255,255,255,0.92); font-size: 0.92rem; line-height: 1.7; }
+    .footer-by   { color: rgba(255,255,255,0.75); font-size: 0.88rem; }
+
+    /* ══════════════════════════════
+       FIX 3: RESPONSIVE MOBILE
+       Pendekatan: di bawah 768px hero & mosaic
+       pakai layout biasa (bukan absolute scale),
+       karena scale kecil jadi teks tidak terbaca
+    ══════════════════════════════ */
+
+    /* Tablet 1024px */
+    @media (max-width: 1024px) {
+        .nav-inner, .what-inner, .how-inner, .fact-inner { padding: 0 24px; }
+        .what-is, .how-to, .fact { padding: 60px 24px; }
+        .step-grid { grid-template-columns: repeat(2,1fr); }
+        .fact-grid { gap: 40px; }
+        footer { padding: 24px; }
+    }
+
+    /* Mobile 768px ke bawah — hero pakai layout flex biasa */
+    @media (max-width: 768px) {
+        /* NAVBAR */
+        .nav-inner { padding: 0 16px; }
+        .brand-name { font-size: 1.2rem; }
+
+        /* HERO: matikan absolute-scaler, pakai flexbox normal */
+        .hero-scaler {
+            padding-bottom: 0 !important;     /* hapus aspect-ratio trick */
+            height: auto;
+        }
+        .hero-inner {
+            position: relative !important;    /* keluar dari absolute */
+            width: 100% !important;
+            height: auto !important;
+            transform: none !important;       /* matikan JS scale */
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px 0;
+            gap: 0;
+        }
+        /* Sembunyikan lingkaran di mobile */
+        .hero-ellipse { display: none; }
+
+        .hero-content {
+            position: relative !important;
+            left: auto !important; top: auto !important;
+            width: 100% !important;
+            padding-bottom: 32px;
+        }
+        .hero-h1 { font-size: 28px; width: 100% !important; }
+        .hero-sub { font-size: 13px; width: 100% !important; }
+        .hero-cta { flex-direction: row; gap: 10px; flex-wrap: wrap; }
+        .btn-solid, .btn-outline-hero { width: auto; flex: 1; min-width: 120px; font-size: 13px; height: 44px; padding: 10px 16px; }
+
+        /* Foto hero di bawah teks, full width */
+        .hero-img-wrap {
+            position: relative !important;
+            left: auto !important; top: auto !important;
+            width: calc(100% + 40px) !important;
+            margin-left: -20px;
+            height: 260px !important;
+            border-radius: 0 !important;
+        }
+
+        /* MOSAIC: matikan absolute scale, grid sederhana */
+        .mosaic-scaler {
+            padding-bottom: 0 !important;
+            height: auto !important;
+            overflow: visible;
+        }
+        .mosaic-inner {
+            position: relative !important;
+            width: 100% !important;
+            height: auto !important;
+            transform: none !important;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        /* Reset semua posisi absolute */
+        .ms {
+            position: relative !important;
+            left: auto !important; top: auto !important;
+            width: 100% !important;
+            height: 160px !important;
+            border-radius: 12px !important;
+        }
+        /* Kolom kiri (r20 kecil, r21 panjang) tetap di kolom 1 */
+        .ms-r20 { grid-column: 1; grid-row: 1; }
+        .ms-r21 { grid-column: 1; grid-row: 2 / span 2; height: 260px !important; }
+        /* Tengah kiri (r16 besar, r19 kecil) */
+        .ms-r16 { grid-column: 2; grid-row: 1 / span 2; height: 260px !important; }
+        .ms-r19 { grid-column: 2; grid-row: 3; }
+        /* Tengah kanan & kanan sembunyikan di mobile supaya tidak terlalu penuh */
+        .ms-r17, .ms-r18, .ms-r22, .ms-r23 { display: none; }
+        /* Fade tidak perlu di mobile */
+        .mosaic-fade { display: none; }
+
+        /* SECTIONS */
+        .what-is, .how-to, .fact { padding: 40px 16px; }
+        .sec-h2 { font-size: 1.5rem; }
+        .step-grid { grid-template-columns: 1fr; gap: 14px; }
+        .step-card { padding: 24px 20px; }
+        .fact-grid { grid-template-columns: 1fr; gap: 32px; }
+        .fact-box  { padding: 28px 24px; }
+        .fact-box-h2 { font-size: 1.3rem; }
+
+        footer { padding: 36px 16px; }
+        .footer-inner { gap: 4px; }
+        .footer-copy { font-size: 0.85rem; }
+        .footer-by   { font-size: 0.8rem; }
+    }
+
+    /* Small mobile 480px */
+    @media (max-width: 480px) {
+        .hero-h1 { font-size: 24px; }
+        .hero-sub { font-size: 12px; }
+        .btn-solid, .btn-outline-hero { font-size: 12px; height: 40px; }
+        .hero-img-wrap { height: 220px !important; }
+        .sec-h2 { font-size: 1.3rem; }
+        .step-h3 { font-size: 0.95rem; }
+        .step-p  { font-size: 0.82rem; }
+        .fact-list li { font-size: 0.85rem; }
+        .fact-box-btns { flex-direction: column; }
+        .fact-box-btns .btn-solid,
+        .fact-box-btns .btn-outline-hero { width: 100%; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="topnav">
+    <div class="nav-inner">
+        <a href="/" class="brand">
+            <img src="/static/logo.png" alt="ThriftIn Logo" class="brand-logo-img">
+            <span class="brand-name">thrift in.</span>
+        </a>
+        <div class="nav-links">
+            <a href="/login"    class="btn-login">Login</a>
+            <a href="/register" class="btn-register">Daftar</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="hero-scaler">
+    <div class="hero-inner" id="heroInner">
+
+        <!-- Lingkaran dekoratif -->
+        <div class="hero-ellipse el-3-1"></div>
+        <div class="hero-ellipse el-3-2"></div>
+        <div class="hero-ellipse el-3-3"></div>
+        <div class="hero-ellipse el-4-1"></div>
+        <div class="hero-ellipse el-4-2"></div>
+        <div class="hero-ellipse el-4-3"></div>
+        <div class="hero-ellipse el-5-1"></div>
+        <div class="hero-ellipse el-5-2"></div>
+        <div class="hero-ellipse el-5-3"></div>
+
+        <!-- Teks & CTA -->
+        <div class="hero-content">
+            <h1 class="hero-h1">Thrifting Sat-Set<br>Tanpa Ongkir.</h1>
+            <p class="hero-sub">Nggak perlu nunggu kurir. Temukan barang thrift incaranmu di lingkungan kampus, chat sellernya, dan ambil hari ini.</p>
+            <div class="hero-cta">
+                <a href="/home"     class="btn-solid">Jelajahi Produk</a>
+                <a href="/register" class="btn-outline-hero">Daftar Sekarang</a>
+            </div>
+        </div>
+
+        <!-- Hero image (ganti src dengan foto kamu) -->
+        <div class="hero-img-wrap">
+            <img src="/static/uploads/landing/hero.jpg"
+                 alt="Thrift clothes"
+                 onerror="this.style.display='none'">
+        </div>
+
+    </div>
+</div>
+
+<!-- ══ WHAT IS IT ══ -->
+<section class="what-is">
+    <div class="what-inner">
+        <span class="sec-label">What is it? ThriftIn?</span>
+        <h2 class="sec-h2">Bawa Thrift favoritmu ke tanganmu</h2>
+        <p class="sec-sub">Eksplorasi gaya thrift di sekitarmu, temukan item incaran, dan jadikan gayamu lebih maksimal dengan cara yang simpel.</p>
+
+        <div class="mosaic-scaler">
+            <div class="mosaic-inner" id="mosaicInner">
+                <div class="ms ms-r20"><img src="/static/uploads/landing/img-0.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r21"><img src="/static/uploads/landing/img-1.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r16"><img src="/static/uploads/landing/img-2.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r19"><img src="/static/uploads/landing/img-3.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r17"><img src="/static/uploads/landing/img-4.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r18"><img src="/static/uploads/landing/img-5.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r22"><img src="/static/uploads/landing/img-6.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="ms ms-r23"><img src="/static/uploads/landing/img-7.jpg" alt="" onerror="this.style.display='none'"></div>
+                <div class="mosaic-fade"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ HOW TO ══ -->
+<section class="how-to">
+    <div class="how-inner">
+        <div class="how-header">
+            <span class="sec-label">How to thrift in?</span>
+            <h2 class="sec-h2">Thrifting Sat-Set dalam 3 Langkah</h2>
+        </div>
+        <div class="step-grid">
+            <div class="step-card">
+                <div class="step-num">01 — Temukan</div>
+                <div class="step-icon-wrap icon-loc">📍</div>
+                <h3 class="step-h3">Dekat kamu</h3>
+                <p class="step-p">Cari barang thrift incaranmu. Semua koleksi tersedia di lingkungan kampus, jadi pasti lebih dekat dan lebih terpercaya.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">02 — Tanya</div>
+                <div class="step-icon-wrap icon-chat">💬</div>
+                <h3 class="step-h3">Chat Penjual</h3>
+                <p class="step-p">Suka dengan barangnya? Langsung chat penjualnya. Tanya detail kondisi atau nego harga secara real-time tanpa harus pindah aplikasi.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">03 — Ambil</div>
+                <div class="step-icon-wrap icon-deal">🤝</div>
+                <h3 class="step-h3">Deal & Temu</h3>
+                <p class="step-p">Sepakat harga? Atur jadwal ketemuan di titik favorit kampus. Cek barangnya, transaksi selesai, barang langsung di tangan!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FACT ══ -->
+<section class="fact">
+    <div class="fact-inner">
+        <span class="sec-label">What's the fact?</span>
+        <h2 class="sec-h2" style="letter-spacing:-0.5px;">Lebih dari Sekadar Marketplace</h2>
+        <div class="fact-grid">
+            <ul class="fact-list">
+                <li><span class="fact-dot"></span>Chat real-time untuk bernegosiasi cepat tanpa pindah aplikasi</li>
+                <li><span class="fact-dot"></span>Filter berdasarkan lokasi, kategori, ukuran, hingga kondisi barang</li>
+                <li><span class="fact-dot"></span>Dashboard seller untuk kelola produk dan pantau pesanan dalam satu tempat</li>
+                <li><span class="fact-dot"></span>Sistem status order yang transparan dari pembayaran hingga selesai transaksi</li>
+            </ul>
+            <div class="fact-box">
+                <span class="fact-box-label">Mulai sekarang</span>
+                <h2 class="fact-box-h2">Siap Thrifting Sat-Set Hari ini?</h2>
+                <p class="fact-box-sub">Jual beli barang thriftmu jadi lebih aman, hemat, dan ramah lingkungan. Yuk, mulai sekarang!</p>
+                <div class="fact-box-btns">
+                    <a href="/home"     class="btn-solid">Jelajahi Produk</a>
+                    <a href="/register" class="btn-outline-hero">Daftar Sekarang</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+    <div class="footer-inner">
+        <p class="footer-copy">© 2026 Thriftin - Marketplace Thrifting Kampus</p>
+        <p class="footer-by">Dibuat oleh Tim 6 KAEFSI GDGOCUG</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    /*
+     * Scale hero & mosaic hanya di DESKTOP (>768px).
+     * Di mobile, CSS sudah handle layout dengan flexbox/grid biasa.
+     */
+    function scaleAll() {
+        const isMobile = window.innerWidth <= 768;
+
+        const heroScaler = document.querySelector('.hero-scaler');
+        const heroInner  = document.getElementById('heroInner');
+        if (heroScaler && heroInner) {
+            if (isMobile) {
+                heroInner.style.transform = 'none';
+            } else {
+                const scale = heroScaler.offsetWidth / 1440;
+                heroInner.style.transform = `scale(${scale})`;
+            }
+        }
+
+        const mosaicScaler = document.querySelector('.mosaic-scaler');
+        const mosaicInner  = document.getElementById('mosaicInner');
+        if (mosaicScaler && mosaicInner) {
+            if (isMobile) {
+                mosaicInner.style.transform = 'none';
+            } else {
+                const scale = mosaicScaler.offsetWidth / 1065;
+                mosaicInner.style.transform = `scale(${scale})`;
+            }
+        }
+    }
+
+    window.addEventListener('load',   scaleAll);
+    window.addEventListener('resize', scaleAll);
+</script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ seller['username'] }} - thrift in.</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #FDF4F4; font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; color: #1a1a1a; }
+
+        /* ══ NAVBAR — JANGAN DIUBAH ══ */
+        .topnav {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid #E7E5E4;
+            padding: 0;
+        }
+        .nav-inner {
+            max-width: 1280px; margin: auto; padding: 0 24px;
+            height: 60px; display: flex; align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo img { width: 26px; height: 36px; object-fit: contain; }
+        .nav-logo-text { font-size: 1.4rem; font-weight: 800; color: #5E0006; line-height: 1; }
+        .nav-links { display: flex; align-items: center; gap: 6px; }
+        .nav-link-item {
+            color: #57534E; font-size: 0.85rem; font-weight: 500;
+            padding: 7px 14px; border-radius: 8px;
+            text-decoration: none; transition: all 0.15s;
+        }
+        .nav-link-item:hover { background: #FDF8F3; color: #5E0006; }
+        .btn-jual-nav {
+            background: #5E0006; color: #fff;
+            font-weight: 700; font-size: 0.82rem;
+            padding: 9px 20px; border-radius: 99px;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-jual-nav:hover { background: #7B1113; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(94,0,6,0.3); color: #fff; }
+        .nav-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: #5E0006; color: white; font-weight: 700;
+            font-size: 0.82rem; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; overflow: hidden;
+            border: none; flex-shrink: 0; text-decoration: none;
+        }
+        .nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .nav-back {
+            color: #57534E; font-size: 0.83rem; font-weight: 600;
+            text-decoration: none; display: flex; align-items: center; gap: 5px;
+            padding: 7px 12px; border-radius: 8px; transition: all 0.15s;
+        }
+        .nav-back:hover { background: #FDF8F3; color: #5E0006; }
+
+        /* ══ HERO BANNER ══ */
+        .hero-banner {
+            background: linear-gradient(135deg, #5E0006 0%, #7B1113 60%, #9B2226 100%);
+            padding: 48px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute; top: -40px; right: -40px;
+            width: 260px; height: 260px;
+            border-radius: 50%;
+            border: 48px solid rgba(255,255,255,0.05);
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute; bottom: 20px; left: -60px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            border: 32px solid rgba(255,255,255,0.04);
+        }
+        /* Wave curve di bawah banner */
+        .hero-wave {
+            position: absolute; bottom: -1px; left: 0; right: 0;
+        }
+        .hero-wave svg { display: block; width: 100%; }
+
+        /* ══ PROFILE CARD FLOATING ══ */
+        .profile-card-wrap {
+            max-width: 960px; margin: -56px auto 0;
+            padding: 0 20px; position: relative; z-index: 10;
+        }
+        .profile-card {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(231,218,218,0.6);
+            box-shadow: 0 20px 60px rgba(94,0,6,0.12), 0 4px 16px rgba(0,0,0,0.06);
+            padding: 28px 32px;
+            display: flex; gap: 28px; align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        /* Avatar */
+        .avatar-wrap { position: relative; flex-shrink: 0; }
+        .seller-avatar {
+            width: 96px; height: 96px; border-radius: 50%;
+            background: linear-gradient(135deg, #5E0006, #9B2226);
+            color: white; font-size: 2.4rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: 0 4px 20px rgba(94,0,6,0.25);
+        }
+        .seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .online-dot {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #22c55e; border: 3px solid white;
+        }
+        .offline-dot {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #aaa; border: 3px solid white;
+        }
+
+        /* Info seller */
+        .seller-info { flex: 1; min-width: 220px; }
+        .seller-username {
+            font-size: 1.35rem; font-weight: 800; color: #1a1a1a;
+            margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+        }
+        .badge-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+        .s-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.72rem; font-weight: 700; padding: 4px 11px;
+            border-radius: 99px;
+        }
+        .sb-trusted { background: #FFF4E5; color: #B45309; border: 1px solid #FDE68A; }
+        .sb-fast    { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+        .sb-online  { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; transition: all 0.3s; }
+        .sb-offline { background: #F5F5F5; color: #888;    border: 1px solid #e0e0e0; transition: all 0.3s; }
+
+        .rating-row {
+            display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+        }
+        .stars { color: #F59E0B; font-size: 0.95rem; letter-spacing: 1px; }
+        .rating-num { font-weight: 800; color: #1a1a1a; font-size: 0.95rem; }
+        .rating-count { color: #888; font-size: 0.82rem; }
+
+        .seller-bio { font-size: 0.875rem; color: #555; line-height: 1.6; margin-bottom: 6px; }
+        .seller-loc { font-size: 0.8rem; color: #888; display: flex; align-items: center; gap: 4px; }
+
+        /* Chat button */
+        .btn-chat-seller {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #5E0006; color: white;
+            font-weight: 700; font-size: 0.875rem;
+            padding: 11px 26px; border-radius: 99px;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: all 0.2s; white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(94,0,6,0.3);
+        }
+        .btn-chat-seller:hover {
+            background: #7B1113; color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(94,0,6,0.4);
+        }
+
+        /* ══ STATS STRIP ══ */
+        .stats-wrap {
+            max-width: 960px; margin: 16px auto 0;
+            padding: 0 20px;
+        }
+        .stats-strip {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #E7DADA;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            overflow: hidden;
+        }
+        .stat-box {
+            padding: 18px 20px; text-align: center;
+            border-right: 1px solid #F0E8E8;
+        }
+        .stat-box:last-child { border-right: none; }
+        .stat-icon { font-size: 1.4rem; margin-bottom: 4px; }
+        .stat-num { font-size: 1.2rem; font-weight: 800; color: #1a1a1a; }
+        .stat-lbl { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+        /* ══ MAIN CONTENT ══ */
+        .main-wrap { max-width: 960px; margin: 24px auto 48px; padding: 0 20px; }
+
+        /* Section card */
+        .sec-card {
+            background: white; border-radius: 20px;
+            border: 1px solid #E7DADA;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            padding: 24px 28px; margin-bottom: 20px;
+        }
+        .sec-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 14px;
+            border-bottom: 1.5px solid #F5EDED;
+        }
+        .sec-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 1rem; font-weight: 800; color: #1a1a1a;
+        }
+        .sec-title-icon {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: #FDF4F4; display: flex; align-items: center;
+            justify-content: center; font-size: 0.9rem;
+        }
+        .sec-count { font-size: 0.8rem; color: #888; font-weight: 500; }
+
+        /* ══ PRODUCT GRID ══ */
+        .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        @media (max-width: 900px) { .prod-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 640px) { .prod-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .pcard {
+            background: #FAFAFA; border-radius: 14px; overflow: hidden;
+            border: 1px solid #F0EBEB; transition: all 0.2s;
+            position: relative; cursor: pointer;
+        }
+        .pcard:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(94,0,6,0.1);
+            border-color: #E7DADA;
+        }
+        .pcard-img-wrap {
+            height: 140px; overflow: hidden; background: #F5EDED;
+            position: relative;
+        }
+        .pcard-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .pcard:hover .pcard-img-wrap img { transform: scale(1.06); }
+        .pcard-placeholder {
+            width: 100%; height: 100%; display: flex; align-items: center;
+            justify-content: center; font-size: 2rem;
+            background: linear-gradient(135deg, #FDF4F4, #F5DADA);
+        }
+        .pbadge {
+            position: absolute; top: 8px; left: 8px;
+            font-size: 0.68rem; font-weight: 700; padding: 3px 9px;
+            border-radius: 99px;
+        }
+        .pbadge-locked { background: #F59E0B; color: white; }
+        .pbadge-sold   { background: #5E0006; color: white; }
+
+        .pcard-body { padding: 10px 12px 14px; }
+        .pcard-title {
+            font-size: 0.82rem; font-weight: 700; color: #1a1a1a;
+            margin-bottom: 3px; line-height: 1.3;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .pcard-price { font-size: 0.9rem; font-weight: 800; color: #5E0006; margin-bottom: 4px; }
+        .pcard-meta { font-size: 0.7rem; color: #999; margin-bottom: 10px; }
+        .btn-pcard {
+            display: block; text-align: center;
+            background: #5E0006; color: white; border: none;
+            border-radius: 8px; padding: 7px 12px;
+            font-size: 0.75rem; font-weight: 700;
+            text-decoration: none; transition: background 0.15s;
+        }
+        .btn-pcard:hover { background: #7B1113; color: white; }
+
+        /* ══ REVIEW SECTION ══ */
+        .review-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+        @media (max-width: 768px) { .review-layout { grid-template-columns: 1fr; } }
+
+        .review-list { }
+        .review-card {
+            display: flex; gap: 12px; padding: 14px 0;
+            border-bottom: 1px solid #F5EDED;
+        }
+        .review-card:last-child { border-bottom: none; }
+        .rv-avatar {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #5E0006, #9B2226);
+            color: white; font-weight: 700; font-size: 0.95rem;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .rv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .rv-body { flex: 1; }
+        .rv-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+        .rv-name { font-weight: 700; font-size: 0.875rem; color: #1a1a1a; }
+        .rv-date { font-size: 0.72rem; color: #aaa; }
+        .rv-stars { color: #F59E0B; font-size: 0.8rem; margin-bottom: 4px; }
+        .rv-text { font-size: 0.83rem; color: #555; line-height: 1.55; }
+
+        /* Form ulasan */
+        .review-form-card {
+            background: #FDF4F4; border-radius: 16px;
+            border: 1.5px solid #E7DADA; padding: 20px;
+            height: fit-content; position: sticky; top: 80px;
+        }
+        .form-title {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 0.88rem; font-weight: 800; color: #1a1a1a;
+            margin-bottom: 14px;
+        }
+        .star-row { display: flex; gap: 5px; margin-bottom: 12px; }
+        .star-btn {
+            font-size: 1.5rem; background: none; border: none;
+            cursor: pointer; color: #ddd; transition: all 0.1s;
+            line-height: 1;
+        }
+        .star-btn.active { color: #F59E0B; }
+        .rv-textarea {
+            width: 100%; border: 1.5px solid #E7DADA; border-radius: 10px;
+            padding: 10px 14px; font-size: 0.85rem; resize: none; outline: none;
+            font-family: inherit; background: white; color: #1a1a1a;
+            transition: border-color 0.15s;
+        }
+        .rv-textarea:focus { border-color: #5E0006; box-shadow: 0 0 0 3px rgba(94,0,6,0.08); }
+        .btn-submit-review {
+            width: 100%; background: #5E0006; color: white; border: none;
+            border-radius: 10px; padding: 12px; font-size: 0.875rem;
+            font-weight: 700; cursor: pointer; margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn-submit-review:hover { background: #7B1113; transform: translateY(-1px); }
+
+        .empty-text {
+            text-align: center; padding: 32px; color: #bbb;
+            font-size: 0.88rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR — tidak diubah -->
+<nav class="topnav">
+    <div class="nav-inner">
+        <a href="{{ '/home' if session.user_id else '/' }}" class="nav-logo">
+            <img src="/static/logo.png" alt="thrift in logo"
+                 onerror="this.style.display='none'">
+            <span class="nav-logo-text">thrift in.</span>
+        </a>
+        <a href="/home" class="nav-back">← Kembali ke Beranda</a>
+    </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+    <div class="hero-wave">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0L1440 0L1440 30C1080 70 360 70 0 30L0 0Z" fill="#FDF4F4"/>
+        </svg>
+    </div>
+</div>
+
+<!-- PROFILE CARD FLOATING -->
+<div class="profile-card-wrap">
+    <div class="profile-card">
+        <!-- Avatar -->
+        <div class="avatar-wrap">
+            <div class="seller-avatar">
+                {% if seller['avatar'] and seller['avatar'] != '' %}
+                <img src="/static/uploads/{{ seller['avatar'] }}" alt="{{ seller['username'] }}">
+                {% else %}
+                {{ seller['username'][0]|upper }}
+                {% endif %}
+            </div>
+            {% if is_online %}
+            <div class="online-dot" id="online-indicator-{{ seller['id'] }}"></div>
+            {% else %}
+            <div class="offline-dot" id="online-indicator-{{ seller['id'] }}"></div>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="seller-info">
+            <div class="seller-username">
+                {{ seller['username'] }}
+            </div>
+
+            <div class="badge-row">
+                {% if is_trusted %}
+                <span class="s-badge sb-trusted">⭐ Trusted Seller</span>
+                {% endif %}
+                {% if is_fast_response %}
+                <span class="s-badge sb-fast">⚡ Fast Response</span>
+                {% endif %}
+                <span class="s-badge {% if is_online %}sb-online{% else %}sb-offline{% endif %}"
+                      id="seller-online-{{ seller['id'] }}">
+                    {% if is_online %}🟢 Aktif sekarang{% else %}⚫ Offline{% endif %}
+                </span>
+            </div>
+
+            {% if avg_rating > 0 %}
+            <div class="rating-row">
+                <span class="stars">
+                    {% for i in range(5) %}
+                        {% if i < avg_rating|int %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </span>
+                <span class="rating-num">{{ avg_rating }}</span>
+                <span class="rating-count">({{ reviews|length }} ulasan)</span>
+            </div>
+            {% endif %}
+
+            {% if seller['bio'] %}
+            <p class="seller-bio">{{ seller['bio'] }}</p>
+            {% endif %}
+            {% if seller['location'] %}
+            <p class="seller-loc">📍 {{ seller['location'] }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Chat button -->
+        {% if session.user_id and session.user_id != seller['id'] and products|length > 0 %}
+        <div style="flex-shrink:0;">
+            <a href="/chat/{{ products[0]['id'] }}" class="btn-chat-seller">
+                💬 Chat dengan Seller
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-wrap">
+    <div class="stats-strip">
+        <div class="stat-box">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-num">{{ products|length }}</div>
+            <div class="stat-lbl">Produk Aktif</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-num">{{ total_done }}</div>
+            <div class="stat-lbl">Transaksi Selesai</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-num">{{ reviews|length }}</div>
+            <div class="stat-lbl">Ulasan</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon">📅</div>
+            <div class="stat-num">2024</div>
+            <div class="stat-lbl">Bergabung</div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-wrap">
+
+    <!-- PRODUK -->
+    <div class="sec-card">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-title-icon">🛍️</div>
+                Produk dari {{ seller['username'] }}
+            </div>
+            <span class="sec-count">{{ products|length }} produk</span>
+        </div>
+
+        {% if products|length == 0 %}
+        <div class="empty-text">Belum ada produk aktif dari seller ini.</div>
+        {% else %}
+        <div class="prod-grid">
+            {% for product in products %}
+            <div class="pcard" onclick="window.location='/product/{{ product['id'] }}'">
+                <div class="pcard-img-wrap">
+                    {% if product['image'] and product['image'] != 'no-image.png' %}
+                    <img src="/static/uploads/{{ product['image'] }}" alt="{{ product['title'] }}"
+                         onerror="this.parentElement.innerHTML='<div class=\'pcard-placeholder\'>👕</div>'">
+                    {% else %}
+                    <div class="pcard-placeholder">
+                        {% if product['category']=='Sepatu' %}👟
+                        {% elif product['category']=='Tas' %}👜
+                        {% elif product['category']=='Aksesoris' %}💍
+                        {% elif product['category']=='Jaket' %}🧥
+                        {% else %}👕{% endif %}
+                    </div>
+                    {% endif %}
+                    {% if product['status']=='locked' %}
+                    <span class="pbadge pbadge-locked">Diproses</span>
+                    {% elif product['status']=='sold' %}
+                    <span class="pbadge pbadge-sold">Terjual</span>
+                    {% endif %}
+                </div>
+                <div class="pcard-body">
+                    <div class="pcard-title">{{ product['title'] }}</div>
+                    <div class="pcard-price">Rp {{ "{:,}".format(product['price']) }}</div>
+                    <div class="pcard-meta">
+                        {{ product['category'] }}
+                        {% if product['size'] and product['size'] != '-' %} · {{ product['size'] }}{% endif %}
+                        · 📍 {{ product['location'] }}
+                    </div>
+                    <a href="/product/{{ product['id'] }}" class="btn-pcard"
+                       onclick="event.stopPropagation()">Lihat Detail</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- REVIEW -->
+    <div class="sec-card">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-title-icon">⭐</div>
+                Ulasan Pembeli
+            </div>
+            <span class="sec-count">{{ reviews|length }} ulasan</span>
+        </div>
+
+        <div class="review-layout">
+            <!-- List ulasan -->
+            <div class="review-list">
+                {% if reviews|length == 0 %}
+                <div class="empty-text">Belum ada ulasan untuk seller ini.</div>
+                {% else %}
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="rv-avatar">
+                        {% if review['reviewer_avatar'] and review['reviewer_avatar'] != '' %}
+                        <img src="/static/uploads/{{ review['reviewer_avatar'] }}"
+                             alt="{{ review['reviewer_name'] }}">
+                        {% else %}
+                        {{ review['reviewer_name'][0]|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="rv-body">
+                        <div class="rv-top">
+                            <span class="rv-name">{{ review['reviewer_name'] }}</span>
+                            <span class="rv-date">{{ review['created_at'][:10] }}</span>
+                        </div>
+                        <div class="rv-stars">
+                            {% for i in range(review['rating']) %}★{% endfor %}
+                            {% for i in range(5 - review['rating']) %}☆{% endfor %}
+                        </div>
+                        {% if review['comment'] %}
+                        <div class="rv-text">{{ review['comment'] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Form tulis ulasan -->
+            {% if session.user_id and session.user_id != seller['id'] %}
+            <div class="review-form-card">
+                <div class="form-title">
+                    ✏️ Tulis Ulasan
+                </div>
+                <p style="font-size:0.78rem;color:#888;margin-bottom:10px;">
+                    Beri penilaian untuk seller ini
+                </p>
+                <form method="POST" action="/seller/{{ seller['username'] }}/review">
+                    <div class="star-row" id="star-row">
+                        {% for i in range(1, 6) %}
+                        <button type="button" class="star-btn active" onclick="setRating({{ i }})">★</button>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="rating" id="rating-val" value="5">
+                    <textarea name="comment" class="rv-textarea" rows="4"
+                              placeholder="Ceritakan pengalaman kamu bertransaksi dengan seller ini..."></textarea>
+                    <button type="submit" class="btn-submit-review">Kirim Ulasan</button>
+                </form>
+                <p style="font-size:0.72rem;color:#aaa;margin-top:8px;text-align:center;">
+                    ℹ️ Ulasan kamu akan membantu pembeli lain.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+<script>
+function setRating(val) {
+    document.getElementById('rating-val').value = val;
+    document.querySelectorAll('.star-btn').forEach((btn, i) => {
+        btn.textContent = i < val ? '★' : '☆';
+        btn.classList.toggle('active', i < val);
+    });
+}
+
+const socket = io();
+{% if session.user_id %}
+socket.emit('user_online', { user_id: {{ session.user_id }} });
+{% endif %}
+
+socket.on('seller_status', function(data) {
+    const badge = document.getElementById('seller-online-' + data.seller_id);
+    const dot   = document.getElementById('online-indicator-' + data.seller_id);
+    if (badge) {
+        badge.textContent = data.online ? '🟢 Aktif sekarang' : '⚫ Offline';
+        badge.className = 's-badge ' + (data.online ? 'sb-online' : 'sb-offline');
+    }
+    if (dot) {
+        dot.style.background = data.online ? '#22c55e' : '#aaa';
+    }
+});
+</script>
+</body>
+</html>

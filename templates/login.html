@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - ThriftIn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333 !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .container-center {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .login-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            font-size: 0.95rem;
+            color: #666;
+        }
+        
+        .login-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #5E0006;
+            box-shadow: 0 0 0 3px rgba(94, 0, 6, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: #999;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: #5E0006;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .btn-login:hover {
+            background: #4a0005;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(94, 0, 6, 0.2);
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .login-footer a {
+            color: #5E0006;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .login-footer a:hover {
+            color: #4a0005;
+            text-decoration: underline;
+        }
+        
+        .alert {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
+                <img src="/static/logo.png" alt="thrift in logo" style="width: 24px; height: 33px; opacity: 1;">
+                <span style="color: #5E0006; font-family: 'Bree Serif', serif; font-size: 28px; font-weight: 400; line-height: 1; margin-top: 4px;">thrift in.</span>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="container-center">
+        <div class="login-wrapper">
+            <div class="login-header">
+                <h2>Selamat Datang</h2>
+                <p>Login untuk mulai beli atau jual barang thrift</p>
+            </div>
+            
+            <div class="login-card">
+                {% if error %}
+                <div class="alert">{{ error }}</div>
+                {% endif %}
+                
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Masukkan Username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Masukkan Password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-login">Masuk</button>
+                </form>
+            </div>
+            
+            <div class="login-footer">
+                Belum punya akun? <a href="/register">Daftar Sekarang</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

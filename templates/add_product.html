@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jual Barang - ThriftIn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        :root {
+            --red: #7B1113;
+            --red-dark: #5E0006;
+            --cream: #FDF8F3;
+            --dark: #1a1a1a;
+            --gray: #6b7280;
+            --border: #e8e3dd;
+        }
+        body { background: #f4f4f4; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        /* NAVBAR STANDARDIZED */
+        .topnav {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+        }
+        .nav-inner {
+            max-width: 1200px; margin: auto;
+            padding: 0 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-logo-img {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .brand-name { font-family: 'Bree Serif', serif; font-size: 1.5rem; color: var(--red-dark); line-height: 1; }
+        .nav-links { display: flex; align-items: center; gap: 12px; }
+        .btn-back {
+            background: none; border: none; color: #444; font-weight: 700;
+            font-size: 0.95rem; padding: 9px 16px; cursor: pointer;
+            text-decoration: none; border-radius: 8px; transition: all 0.2s;
+        }
+        .btn-back:hover { background: var(--cream); color: var(--red-dark); }
+
+        .form-card { background: white; border-radius: 16px; border: 1px solid #ebebeb; padding: 28px; max-width: 580px; margin: 32px auto; }
+        .form-title { font-size: 1.2rem; font-weight: 800; color: #1a1a1a; margin-bottom: 24px; }
+        .section-sep { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
+        .section-sep::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
+
+        label.lbl { display: block; font-size: 0.83rem; font-weight: 700; color: #333; margin-bottom: 6px; }
+        label.lbl span { color: #aaa; font-weight: 400; }
+        .form-control, .form-select {
+            border: 1.5px solid #e0e0e0; border-radius: 10px;
+            padding: 10px 14px; font-size: 0.88rem; color: #1a1a1a;
+            width: 100%; outline: none; transition: border-color 0.15s;
+            background: white;
+        }
+        .form-control:focus, .form-select:focus { border-color: #2d8c5e; box-shadow: 0 0 0 3px rgba(45,140,94,0.1); }
+        textarea.form-control { resize: vertical; }
+
+        /* SIZE PILLS */
+        .size-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .size-pill {
+            border: 1.5px solid #e0e0e0; border-radius: 8px;
+            padding: 6px 14px; font-size: 0.82rem; font-weight: 700;
+            background: white; cursor: pointer; color: #444;
+            transition: all 0.15s; user-select: none;
+        }
+        .size-pill:hover { border-color: #2d8c5e; color: #2d8c5e; }
+        .size-pill.active { border-color: #2d8c5e; background: #f0faf5; color: #2d8c5e; }
+
+        /* MANUAL INPUT */
+        .manual-wrap { display: flex; align-items: center; gap: 0; max-width: 220px; }
+        .manual-wrap input { border-radius: 10px 0 0 10px; border-right: none; }
+        .manual-wrap .unit-label {
+            background: #f5f5f5; border: 1.5px solid #e0e0e0;
+            border-left: none; border-radius: 0 10px 10px 0;
+            padding: 10px 14px; font-size: 0.85rem; font-weight: 700;
+            color: #666; white-space: nowrap;
+        }
+
+        /* CONDITION CARDS */
+        .condition-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .condition-opt input { display: none; }
+        .condition-opt label {
+            display: block; border: 1.5px solid #e0e0e0; border-radius: 10px;
+            padding: 10px 14px; cursor: pointer; transition: all 0.15s;
+        }
+        .condition-opt label .cond-title { font-size: 0.85rem; font-weight: 700; color: #333; margin-bottom: 2px; }
+        .condition-opt label .cond-sub { font-size: 0.75rem; color: #888; }
+        .condition-opt input:checked + label { border-color: #2d8c5e; background: #f0faf5; }
+        .condition-opt input:checked + label .cond-title { color: #2d8c5e; }
+
+        /* SUBMIT */
+        .btn-submit {
+            background: #2d8c5e; color: white; border: none;
+            border-radius: 10px; padding: 14px; font-size: 0.95rem;
+            font-weight: 700; width: 100%; cursor: pointer;
+            transition: background 0.15s; margin-top: 8px;
+        }
+        .btn-submit:hover { background: #1f6b47; }
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="nav-inner">
+        <a href="/" class="brand">
+            <img src="/static/logo.png" alt="ThriftIn Logo" class="brand-logo-img">
+            <span class="brand-name">thrift in.</span>
+        </a>
+        <div class="nav-links">
+            <a href="javascript:history.back()" class="btn-back">← Kembali</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+<div class="form-card">
+    <div class="form-title">Jual Barang Thrift</div>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <!-- INFO DASAR -->
+        <div class="section-sep">Info Barang</div>
+
+        <div class="mb-3">
+            <label class="lbl">Nama Barang</label>
+            <input type="text" name="title" class="form-control"
+                   placeholder="Contoh: Jaket Denim Levis Vintage" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="lbl">Deskripsi <span>(opsional)</span></label>
+            <textarea name="description" class="form-control" rows="3"
+                      placeholder="Ceritakan barang ini — dari mana, berapa kali dipakai, dll..."></textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="mb-3">
+            <div>
+                <label class="lbl">Harga Asli (Rp)</label>
+                <input type="number" name="price" class="form-control"
+                       placeholder="85000" required min="0">
+            </div>
+            <div>
+                <label class="lbl">Diskon % <span style="color:#aaa;font-weight:400;">(opsional)</span></label>
+                <input type="number" name="discount" class="form-control"
+                       placeholder="0" min="0" max="90" value="0">
+                <small style="color:#aaa;font-size:0.75rem;">Isi 0 jika tidak ada diskon</small>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="lbl">Kategori</label>
+            <select name="category" class="form-select" required>
+                <option value="">-- Pilih --</option>
+                <option value="Baju">Baju</option>
+                <option value="Jaket">Jaket</option>
+                <option value="Sepatu">Sepatu</option>
+                <option value="Tas">Tas</option>
+                <option value="Aksesoris">Aksesoris</option>
+            </select>
+        </div>
+
+        <!-- UKURAN -->
+        <div class="section-sep">Ukuran</div>
+
+        <div class="mb-3">
+            <label class="lbl">Sistem Ukuran</label>
+            <select id="size-system" class="form-select mb-3" onchange="updateSize()">
+                <option value="letter">Huruf (S, M, L, XL...)</option>
+                <option value="eu">Nomor EU — Sepatu Eropa</option>
+                <option value="uk">Nomor UK — Sepatu Inggris</option>
+                <option value="us">Nomor US — Sepatu Amerika</option>
+                <option value="jp">Nomor JP/cm — Sepatu Jepang</option>
+                <option value="none">Tidak Ada Ukuran</option>
+            </select>
+
+            <!-- Tombol untuk huruf -->
+            <div id="wrap-letter">
+                <div class="size-pills" id="pills-letter">
+                    <button type="button" class="size-pill" onclick="pickSize('XXS',this)">XXS</button>
+                    <button type="button" class="size-pill" onclick="pickSize('XS',this)">XS</button>
+                    <button type="button" class="size-pill" onclick="pickSize('S',this)">S</button>
+                    <button type="button" class="size-pill" onclick="pickSize('M',this)">M</button>
+                    <button type="button" class="size-pill" onclick="pickSize('L',this)">L</button>
+                    <button type="button" class="size-pill" onclick="pickSize('XL',this)">XL</button>
+                    <button type="button" class="size-pill" onclick="pickSize('XXL',this)">XXL</button>
+                </div>
+            </div>
+
+            <!-- Input angka untuk nomor -->
+            <div id="wrap-number" style="display:none;">
+                <label class="lbl mb-2">Masukkan ukuran angka <span id="hint-unit">(EU)</span></label>
+                <div class="manual-wrap">
+                    <input type="number" id="number-input" class="form-control"
+                           placeholder="42" min="1" max="70" step="0.5"
+                           oninput="updateNumberSize()">
+                    <div class="unit-label" id="unit-label">EU</div>
+                </div>
+                <small style="color:#aaa;font-size:0.75rem;margin-top:6px;display:block;">
+                    Contoh: ketik 42 → tersimpan sebagai "42 EU"
+                </small>
+            </div>
+
+            <!-- Tidak ada ukuran -->
+            <div id="wrap-none" style="display:none;">
+                <small style="color:#aaa;font-size:0.82rem;">Tidak ada ukuran untuk produk ini.</small>
+            </div>
+
+            <!-- Hidden input yang dikirim ke server -->
+            <input type="hidden" name="size" id="size-final" value="-">
+        </div>
+
+        <!-- KONDISI -->
+        <div class="section-sep">Kondisi</div>
+
+        <div class="mb-3">
+            <div class="condition-grid">
+                <div class="condition-opt">
+                    <input type="radio" name="condition" value="Sangat Baik" id="c1">
+                    <label for="c1">
+                        <div class="cond-title">Sangat Baik</div>
+                        <div class="cond-sub">9–10/10, hampir baru</div>
+                    </label>
+                </div>
+                <div class="condition-opt">
+                    <input type="radio" name="condition" value="Baik" id="c2" checked>
+                    <label for="c2">
+                        <div class="cond-title">Baik</div>
+                        <div class="cond-sub">7–8/10, bekas wajar</div>
+                    </label>
+                </div>
+                <div class="condition-opt">
+                    <input type="radio" name="condition" value="Cukup Baik" id="c3">
+                    <label for="c3">
+                        <div class="cond-title">Cukup Baik</div>
+                        <div class="cond-sub">5–6/10, ada bekas jelas</div>
+                    </label>
+                </div>
+                <div class="condition-opt">
+                    <input type="radio" name="condition" value="Perlu Perbaikan" id="c4">
+                    <label for="c4">
+                        <div class="cond-title">Perlu Perbaikan</div>
+                        <div class="cond-sub">Di bawah 5/10</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="lbl">Detail Cacat / Defect <span>(isi jika ada kerusakan)</span></label>
+            <textarea name="defect" class="form-control" rows="2"
+                      placeholder="Contoh: ada noda kecil di bahu kiri, jahitan siku sedikit lepas..."></textarea>
+        </div>
+        <!-- STOK -->
+        <div class="section-sep">Stok</div>
+        <div class="mb-3">
+            <label class="lbl">Jumlah Stok <span>(berapa unit yang tersedia)</span></label>
+            <div style="max-width:180px;">
+                <input type="number" name="stock" class="form-control"
+                value="1" min="1" max="999" required>
+            </div>
+            <small style="color:#aaa;font-size:0.75rem;margin-top:4px;display:block;">
+                Stok akan berkurang otomatis setiap ada transaksi selesai.
+            </small>
+        </div>
+        <!-- LOKASI & KONTAK -->
+        <div class="section-sep">Lokasi & Kontak</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" class="mb-3">
+            <div>
+                <label class="lbl">Lokasi</label>
+                <select name="location" class="form-select" required>
+                    <option value="">-- Pilih --</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Depok">Depok</option>
+                    <option value="Bekasi">Bekasi</option>
+                    <option value="Tangerang">Tangerang</option>
+                    <option value="Bogor">Bogor</option>
+                </select>
+            </div>
+            <div>
+                <label class="lbl">Nomor WhatsApp</label>
+                <input type="text" name="wa_number" class="form-control"
+                       placeholder="628xxxxxxxxxx">
+            </div>
+        </div>
+
+        <!-- FOTO -->
+        <div class="section-sep">Foto Produk</div>
+
+        <div class="mb-4">
+            <label class="lbl">Upload Foto <span>(JPG/PNG, opsional)</span></label>
+            <input type="file" name="image" class="form-control" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn-submit">Posting Barang</button>
+
+    </form>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const unitMap = { eu: 'EU', uk: 'UK', us: 'US', jp: 'cm' };
+
+    function updateSize() {
+        const sys = document.getElementById('size-system').value;
+        document.getElementById('wrap-letter').style.display = sys === 'letter' ? 'block' : 'none';
+        document.getElementById('wrap-number').style.display = (sys !== 'letter' && sys !== 'none') ? 'block' : 'none';
+        document.getElementById('wrap-none').style.display = sys === 'none' ? 'block' : 'none';
+        document.getElementById('size-final').value = '-';
+        document.getElementById('number-input').value = '';
+        document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+
+        if (sys !== 'letter' && sys !== 'none') {
+            const unit = unitMap[sys];
+            document.getElementById('unit-label').textContent = unit;
+            document.getElementById('hint-unit').textContent = '(' + unit + ')';
+        }
+    }
+
+    function pickSize(val, el) {
+        document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('size-final').value = val;
+    }
+
+    function updateNumberSize() {
+        const sys = document.getElementById('size-system').value;
+        const unit = unitMap[sys] || '';
+        const val = document.getElementById('number-input').value.trim();
+        document.getElementById('size-final').value = val ? (val + ' ' + unit) : '-';
+    }
+</script>
+</body>
+</html>

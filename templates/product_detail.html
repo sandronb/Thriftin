@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ product['title'] }} - ThriftIn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { background: #f5f7f6; font-family: 'Segoe UI', system-ui, sans-serif; color: #1a1a1a; }
+        
+        
+        .brand span { color: #4dbf8e; font-style: italic; }
+        
+        .back-btn:hover { color: white; }
+
+        .detail-wrap { max-width: 1000px; margin: 28px auto; padding: 0 16px 48px; display: grid; grid-template-columns: 58% 1fr; gap: 24px; align-items: start; }
+        @media (max-width: 768px) { .detail-wrap { grid-template-columns: 1fr; } }
+
+        .img-card { background: white; border-radius: 16px; border: 1px solid #ebebeb; overflow: hidden; position: relative; }
+        .img-card img { width: 100%; height: 420px; object-fit: cover; display: block; }
+        .img-placeholder { width: 100%; height: 420px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); display: flex; align-items: center; justify-content: center; font-size: 6rem; }
+
+        .btn-wishlist-detail { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; background: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: 0 2px 10px rgba(0,0,0,0.15); transition: transform 0.2s; z-index: 3; }
+        .btn-wishlist-detail:hover { transform: scale(1.15); }
+
+        .info-card { background: white; border-radius: 16px; border: 1px solid #ebebeb; padding: 22px; position: sticky; top: 20px; }
+
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; margin-bottom: 12px; }
+        .sp-available { background: #e0f5ec; color: #1a7a4a; }
+        .sp-locked { background: #fff3cd; color: #856404; }
+        .sp-sold { background: #fde8e8; color: #842029; }
+
+        .prod-title { font-size: 1.25rem; font-weight: 800; color: #1a1a1a; line-height: 1.3; margin-bottom: 8px; }
+        .prod-price { font-size: 1.6rem; font-weight: 900; color: #2d8c5e; margin-bottom: 14px; }
+
+        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .btn-buy { background: #1a1a1a; color: white; border: none; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 0.88rem; text-align: center; text-decoration: none; cursor: pointer; transition: all 0.15s; display: block; }
+        .btn-buy:hover { background: #333; color: white; transform: translateY(-1px); }
+        .btn-chat { background: #f0faf5; color: #2d8c5e; border: 2px solid #c8e6c9; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 0.88rem; text-align: center; text-decoration: none; transition: all 0.15s; display: block; }
+        .btn-chat:hover { background: #e0f5ea; color: #1a7a4a; transform: translateY(-1px); }
+        .btn-full { grid-column: span 2; }
+        .btn-disabled { background: #f5f5f5; color: #aaa; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 0.88rem; text-align: center; display: block; grid-column: span 2; }
+
+        .divider { height: 1px; background: #f0f0f0; margin: 14px 0; }
+
+        .tags-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+        .tag { font-size: 0.76rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+        .tag-default { background: #f0f0f0; color: #555; }
+        .tag-green { background: #e0f5ec; color: #1a7a4a; }
+        .tag-yellow { background: #fff3cd; color: #856404; }
+
+        .seller-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+        .seller-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #2d8c5e, #4dbf8e); color: white; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        .seller-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .seller-name-link { font-weight: 700; font-size: 0.88rem; color: #1a1a1a; text-decoration: none; }
+        .seller-name-link:hover { color: #2d8c5e; }
+
+        .seller-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 3px; }
+        .sbadge { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; transition: all 0.3s; }
+        .sbadge-online { background: #e0f5ec; color: #1a7a4a; }
+        .sbadge-offline { background: #f0f0f0; color: #888; }
+        .sbadge-trusted { background: #fff3cd; color: #856404; }
+        .sbadge-fast { background: #e3f2fd; color: #0c447c; }
+
+        .desc-text { font-size: 0.88rem; color: #555; line-height: 1.7; margin-bottom: 10px; }
+
+        .defect-box { background: #fff8e1; border-left: 3px solid #f0a500; border-radius: 0 10px 10px 0; padding: 10px 14px; margin-bottom: 12px; }
+        .defect-label { font-size: 0.75rem; font-weight: 700; color: #856404; margin-bottom: 3px; }
+        .defect-text { font-size: 0.85rem; color: #664d03; }
+
+        .stock-section { background: #f8f8f8; border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+        .stock-label { font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+        .stock-form { display: flex; gap: 8px; align-items: center; }
+        .stock-input { width: 80px; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 7px 10px; font-size: 0.85rem; outline: none; }
+        .stock-input:focus { border-color: #2d8c5e; }
+        .btn-stock { background: #1a1a1a; color: white; border: none; border-radius: 8px; padding: 7px 14px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+        .btn-stock:hover { background: #333; }
+
+        .report-link { font-size: 0.75rem; color: #ccc; text-decoration: none; display: block; text-align: center; margin-top: 10px; }
+        .report-link:hover { color: #dc3545; }
+    
+    /* ══ NAVBAR STANDAR ══ */
+    .topnav {
+        position: sticky; top: 0; z-index: 200;
+        background: rgba(255,255,255,0.97);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid #E7E5E4;
+        padding: 0;
+    }
+    .nav-inner {
+        max-width: 1280px; margin: auto; padding: 0 24px;
+        height: 60px; display: flex; align-items: center;
+        justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo img { width: 26px; height: 36px; object-fit: contain; }
+    .nav-logo-text { font-family: 'Bree Serif', serif; font-size: 1.4rem; color: #5E0006; line-height: 1; }
+    .nav-links { display: flex; align-items: center; gap: 6px; }
+    .nav-link-item {
+        color: #57534E; font-size: 0.85rem; font-weight: 500;
+        padding: 7px 14px; border-radius: 8px;
+        text-decoration: none; transition: all 0.15s;
+    }
+    .nav-link-item:hover { background: #FDF8F3; color: #5E0006; }
+    .btn-jual-nav {
+        background: #5E0006; color: #fff;
+        font-weight: 700; font-size: 0.82rem;
+        padding: 9px 20px; border-radius: 99px;
+        text-decoration: none; border: none; cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-jual-nav:hover { background: #7B1113; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(94,0,6,0.3); color: #fff; }
+    .nav-avatar {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: #5E0006; color: white; font-weight: 700;
+        font-size: 0.82rem; display: flex; align-items: center;
+        justify-content: center; cursor: pointer; overflow: hidden;
+        border: none; flex-shrink: 0;
+        text-decoration: none;
+    }
+    .nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .nav-back {
+        color: #57534E; font-size: 0.83rem; font-weight: 600;
+        text-decoration: none; display: flex; align-items: center; gap: 5px;
+        padding: 7px 12px; border-radius: 8px; transition: all 0.15s;
+    }
+    .nav-back:hover { background: #FDF8F3; color: #5E0006; }
+
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="nav-inner">
+        <a href="{{ '/home' if session.user_id else '/' }}" class="nav-logo">
+            <img src="/static/logo.png" alt="thrift in logo">
+            <span class="nav-logo-text">thrift in.</span>
+        </a>
+        <a href="/home" class="nav-back">← Kembali ke Produk</a>
+    </div>
+</nav>
+
+<div class="detail-wrap">
+
+    <!-- KIRI: Gambar -->
+    <div>
+        <div class="img-card">
+            {% if product['image'] and product['image'] != 'no-image.png' %}
+            <img src="/static/uploads/{{ product['image'] }}" alt="{{ product['title'] }}"
+                 onerror="this.style.display='none'">
+            {% else %}
+            <div class="img-placeholder">
+                {% if product['category']=='Sepatu' %}👟
+                {% elif product['category']=='Tas' %}👜
+                {% elif product['category']=='Aksesoris' %}💍
+                {% elif product['category']=='Jaket' %}🧥
+                {% else %}👕{% endif %}
+            </div>
+            {% endif %}
+
+            {% if session.user_id and session.user_id != product['user_id'] %}
+            <button onclick="toggleWishlistDetail({{ product['id'] }}, this)"
+                    class="btn-wishlist-detail">
+                {{ '❤️' if is_wishlisted else '🤍' }}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- KANAN: Info -->
+    <div>
+        <div class="info-card">
+            {% if product['status']=='available' %}
+            <span class="status-pill sp-available">✅ Tersedia</span>
+            {% elif product['status']=='locked' %}
+            <span class="status-pill sp-locked">⏳ Sedang Diproses</span>
+            {% else %}
+            <span class="status-pill sp-sold">❌ Terjual</span>
+            {% endif %}
+
+            <div class="prod-title">{{ product['title'] }}</div>
+            <div class="prod-price">Rp {{ "{:,}".format(product['price']) }}</div>
+
+            <!-- Tombol aksi — berdasarkan role -->
+            {% if session.user_id and session.user_id == product['user_id'] %}
+            <div class="stock-section">
+                <div class="stock-label">Update Stok Produk</div>
+                <form method="POST" action="/product/{{ product['id'] }}/update_stock"
+                      class="stock-form">
+                    <input type="number" name="stock" class="stock-input"
+                           value="{{ product['stock'] }}" min="0" max="999">
+                    <button type="submit" class="btn-stock">Simpan</button>
+                </form>
+                <small style="color:#aaa;font-size:0.72rem;margin-top:4px;display:block;">
+                    Set ke 0 untuk tandai habis.
+                </small>
+            </div>
+            {% elif product['status']=='available' %}
+                {% if session.user_id %}
+                <div class="action-btns">
+                    <a href="/checkout/{{ product['id'] }}" class="btn-buy">🛒 Beli Sekarang</a>
+                    <a href="/chat/{{ product['id'] }}" class="btn-chat">💬 Chat Penjual</a>
+                </div>
+                {% else %}
+                <a href="/login" class="btn-buy btn-full"
+                   style="display:block;text-align:center;margin-bottom:14px;">
+                   Login untuk Beli
+                </a>
+                {% endif %}
+            {% elif product['status']=='locked' %}
+            <div class="btn-disabled">⏳ Barang sedang diproses pembeli lain</div>
+            {% else %}
+            <div class="btn-disabled">❌ Barang sudah terjual</div>
+            {% endif %}
+
+            <div class="divider"></div>
+
+            <!-- Tags -->
+            <div class="tags-row">
+                <span class="tag tag-default">{{ product['category'] }}</span>
+                <span class="tag tag-default">📍 {{ product['location'] }}</span>
+                {% if product['size'] and product['size'] != '-' %}
+                <span class="tag tag-green">📏 {{ product['size'] }}</span>
+                {% endif %}
+                {% if product['condition'] %}
+                <span class="tag tag-green">{{ product['condition'] }}</span>
+                {% endif %}
+                {% if product['stock'] and product['stock'] > 0 %}
+                <span class="tag tag-yellow">📦 Stok: {{ product['stock'] }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Seller -->
+            {% if seller %}
+            <div class="divider"></div>
+            <div class="seller-row">
+                <div class="seller-avatar">
+                    {% if seller['avatar'] and seller['avatar'] != '' %}
+                    <img src="/static/uploads/{{ seller['avatar'] }}" alt="{{ seller['username'] }}">
+                    {% else %}
+                    {{ seller['username'][0]|upper }}
+                    {% endif %}
+                </div>
+                <div style="flex:1;">
+                    <div style="font-size:0.75rem;color:#888;margin-bottom:2px;">Dijual oleh</div>
+                    <a href="/seller/{{ seller['username'] }}" class="seller-name-link">
+                        {{ seller['username'] }}
+                    </a>
+                    <div class="seller-badges">
+                        <!-- Badge online dengan ID untuk update realtime -->
+                        <span class="sbadge sbadge-online"
+                              id="seller-online-{{ seller['id'] }}">
+                            🟢 Aktif
+                        </span>
+                        {% if seller_trusted %}
+                        <span class="sbadge sbadge-trusted">⭐ Trusted</span>
+                        {% endif %}
+                        {% if seller_fast %}
+                        <span class="sbadge sbadge-fast">⚡ Fast Response</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+            {% endif %}
+
+            {% if product['description'] %}
+            <p class="desc-text">{{ product['description'] }}</p>
+            {% endif %}
+
+            {% if product['defect'] and product['defect'] != '-' %}
+            <div class="defect-box">
+                <div class="defect-label">⚠️ Detail Cacat / Defect</div>
+                <div class="defect-text">{{ product['defect'] }}</div>
+            </div>
+            {% endif %}
+
+            {% if session.user_id and session.user_id != product['user_id'] %}
+            <a href="/report/{{ product['id'] }}" class="report-link">🚩 Laporkan produk ini</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+<script>
+const socket = io();
+
+{% if session.user_id %}
+socket.emit('user_online', { user_id: {{ session.user_id }} });
+{% endif %}
+
+// Update status online seller
+socket.on('seller_status', function(data) {
+    const el = document.getElementById('seller-online-' + data.seller_id);
+    if (el) {
+        el.textContent = data.online ? '🟢 Aktif' : '⚫ Offline';
+        el.style.background = data.online ? '#e0f5ec' : '#f0f0f0';
+        el.style.color = data.online ? '#1a7a4a' : '#888';
+    }
+});
+
+// Wishlist toggle tanpa refresh
+function toggleWishlistDetail(productId, btn) {
+    fetch('/wishlist/toggle/' + productId, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.textContent = data.in_wishlist ? '❤️' : '🤍';
+        btn.style.transform = 'scale(1.3)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 200);
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wishlist - ThriftIn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --red: #7B1113;
+            --red-dark: #5E0006;
+            --cream: #FDF8F3;
+            --dark: #1a1a1a;
+            --gray: #6b7280;
+            --border: #e8e3dd;
+        }
+        body { background: #f5f7f6; font-family: 'Segoe UI', system-ui, sans-serif; color: #1a1a1a; }
+        
+        /* NAVBAR STANDARDIZED */
+        .topnav {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+        }
+        .nav-inner {
+            max-width: 1200px; margin: auto;
+            padding: 0 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-logo-img {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .brand-name { font-family: 'Bree Serif', serif; font-size: 1.5rem; color: var(--red-dark); line-height: 1; }
+        .nav-links { display: flex; align-items: center; gap: 12px; }
+        .btn-back {
+            background: none; border: none; color: #444; font-weight: 700;
+            font-size: 0.95rem; padding: 9px 16px; cursor: pointer;
+            text-decoration: none; border-radius: 8px; transition: all 0.2s;
+        }
+        .btn-back:hover { background: var(--cream); color: var(--red-dark); }
+
+        .page-header { padding: 28px 0 20px; }
+        .page-title { font-size: 1.3rem; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+        .page-sub { font-size: 0.85rem; color: #888; }
+
+        /* GRID */
+        .wish-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        @media (max-width: 1024px) { .wish-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .wish-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* CARD */
+        .wcard { background: white; border-radius: 14px; overflow: hidden; border: 1px solid #ebebeb; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+        .wcard:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,0.1); }
+
+        /* IMAGE */
+        .wcard-img { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: #f0f0f0; }
+        .wcard-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .wcard:hover .wcard-img img { transform: scale(1.05); }
+        .wcard-img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); font-size: 3rem; }
+
+        /* LIKE BUTTON */
+        .btn-like { position: absolute; top: 10px; right: 10px; z-index: 3; width: 34px; height: 34px; border-radius: 50%; background: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+        .btn-like:hover { transform: scale(1.2); }
+        .btn-like.active { background: #fff0f0; }
+
+        /* BADGE */
+        .card-badge { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+        .badge-trending { background: #ff6b6b; color: white; }
+        .badge-pricedrop { background: #2d8c5e; color: white; }
+
+        /* BODY */
+        .wcard-body { padding: 10px; }
+        .wcard-title { font-size: 0.78rem; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .wcard-price { font-size: 0.9rem; font-weight: 800; color: #2d8c5e; margin-bottom: 3px; }
+        .wcard-meta { font-size: 0.68rem; color: #999; margin-bottom: 8px; }
+        .wcard-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .btn-detail { background: #1a1a1a; color: white; border: none; border-radius: 6px; padding: 6px; font-size: 0.7rem; font-weight: 700; text-align: center; text-decoration: none; transition: background 0.15s; display: block; }
+        .btn-detail:hover { background: #333; color: white; }
+        .btn-remove { background: #fff0f0; color: #dc3545; border: 1.5px solid #fcccc8; border-radius: 6px; padding: 6px; font-size: 0.7rem; font-weight: 700; text-align: center; cursor: pointer; transition: all 0.15s; display: block; width: 100%; }
+        .btn-remove:hover { background: #fde8e8; }
+
+        /* EMPTY */
+        .empty-wrap { text-align: center; padding: 80px 24px; }
+        .empty-icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.4; }
+        .empty-title { font-size: 1.1rem; font-weight: 800; color: #333; margin-bottom: 8px; }
+        .empty-sub { font-size: 0.88rem; color: #888; margin-bottom: 24px; }
+        .btn-explore { background: #2d8c5e; color: white; border: none; border-radius: 99px; padding: 12px 32px; font-size: 0.9rem; font-weight: 700; text-decoration: none; display: inline-block; transition: background 0.15s; }
+        .btn-explore:hover { background: #1f6b47; color: white; }
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="nav-inner">
+        <a href="/" class="brand">
+            <img src="/static/logo.png" alt="ThriftIn Logo" class="brand-logo-img">
+            <span class="brand-name">thrift in.</span>
+        </a>
+        <div class="nav-links">
+            <a href="javascript:history.back()" class="btn-back">← Kembali</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <div class="page-title">❤️ Wishlist Saya</div>
+        <div class="page-sub">{{ products|length }} produk tersimpan</div>
+    </div>
+
+    {% if products|length == 0 %}
+    <div class="empty-wrap">
+        <div class="empty-icon">🤍</div>
+        <div class="empty-title">Wishlist masih kosong</div>
+        <div class="empty-sub">Simpan produk yang kamu suka dengan menekan tombol ❤️ di card produk.</div>
+        <a href="/home" class="btn-explore">Jelajahi Produk</a>
+    </div>
+    {% else %}
+    <div class="wish-grid">
+        {% for product in products %}
+        <div class="wcard">
+            <!-- Image -->
+            <div class="wcard-img">
+                {% if product['image'] and product['image'] != 'no-image.png' %}
+                <img src="/static/uploads/{{ product['image'] }}" alt="{{ product['title'] }}"
+                     onerror="this.parentElement.innerHTML='<div class=\'wcard-img-placeholder\'>👕</div>'">
+                {% else %}
+                <div class="wcard-img-placeholder">
+                    {% if product['category'] == 'Sepatu' %}👟
+                    {% elif product['category'] == 'Tas' %}👜
+                    {% elif product['category'] == 'Aksesoris' %}💍
+                    {% elif product['category'] == 'Jaket' %}🧥
+                    {% else %}👕{% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Badge trending untuk produk termurah -->
+                {% if product['price'] < 100000 %}
+                <span class="card-badge badge-pricedrop">💸 Murah</span>
+                {% endif %}
+
+                <!-- Like button (active karena ini wishlist) -->
+                <form method="POST" action="/wishlist/toggle/{{ product['id'] }}" style="display:inline;">
+                    <button type="submit" class="btn-like active">❤️</button>
+                </form>
+            </div>
+
+            <!-- Body -->
+            <div class="wcard-body">
+                <div class="wcard-title">{{ product['title'] }}</div>
+                <div class="wcard-price">Rp {{ "{:,}".format(product['price']) }}</div>
+                <div class="wcard-meta">
+                    {{ product['category'] }}
+                    {% if product['size'] and product['size'] != '-' %} · {{ product['size'] }}{% endif %}
+                    · 📍 {{ product['location'] }}
+                </div>
+                <div class="wcard-actions">
+                    <a href="/product/{{ product['id'] }}" class="btn-detail">Lihat Detail</a>
+                    <form method="POST" action="/wishlist/toggle/{{ product['id'] }}">
+                        <button type="submit" class="btn-remove">✕ Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

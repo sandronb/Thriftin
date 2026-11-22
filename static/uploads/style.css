@@ -1,0 +1,60 @@
+/* ThriftIn Design System */
+:root {
+    --primary: #2d8c5e;
+    --primary-dark: #1f6b47;
+    --primary-light: #e0f5ec;
+    --bg: #f5f7f6;
+    --surface: #ffffff;
+    --border: #ebebeb;
+    --text: #1a1a1a;
+    --text-muted: #888;
+    --danger: #dc3545;
+    --warning: #f0a500;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); }
+
+/* Konsisten navbar */
+.topnav { background: #1a1a1a !important; }
+
+/* Konsisten button */
+.btn-primary-app {
+    background: var(--primary); color: white; border: none;
+    border-radius: 99px; padding: 10px 24px; font-weight: 700;
+    font-size: 0.9rem; cursor: pointer; text-decoration: none;
+    display: inline-block; transition: all 0.15s;
+}
+.btn-primary-app:hover { background: var(--primary-dark); color: white; transform: translateY(-1px); }
+
+.btn-dark-app {
+    background: #1a1a1a; color: white; border: none;
+    border-radius: 10px; padding: 10px 20px; font-weight: 700;
+    font-size: 0.88rem; cursor: pointer; text-decoration: none;
+    display: inline-block; transition: all 0.15s;
+}
+.btn-dark-app:hover { background: #333; color: white; }
+
+/* Konsisten card */
+.app-card {
+    background: var(--surface); border-radius: 16px;
+    border: 1px solid var(--border); padding: 24px;
+}
+
+/* Konsisten form input */
+.app-input {
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; font-size: 0.88rem; width: 100%;
+    outline: none; transition: border-color 0.15s; background: white;
+    color: var(--text);
+}
+.app-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45,140,94,0.1); }
+
+/* Section label konsisten */
+.app-section-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--primary); margin-bottom: 4px;
+}
+.app-section-title {
+    font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 18px;
+}

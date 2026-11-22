@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard Seller - ThriftIn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --red:      #7B1113;
+            --red-dark: #5E0006;
+            --cream:    #FDF8F3;
+            --dark:     #1a1a1a;
+            --gray:     #6b7280;
+            --border:   #e8e3dd;
+            --bg:       #f5f5f5;
+            --white:    #fff;
+            --radius:   14px;
+            --shadow:   0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; margin: 0; }
+
+        /* ══ NAVBAR ══ */
+        .topnav {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+        }
+        .nav-inner {
+            max-width: 1200px; margin: auto;
+            padding: 0 24px; height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo img { width: 24px; height: 33px; object-fit: contain; }
+        .nav-logo-text { font-family: 'Bree Serif', serif; font-size: 1.35rem; color: var(--red-dark); line-height: 1; }
+        /* ✅ Navbar hanya ada tombol kembali, TIDAK ada tombol jual */
+        .nav-back {
+            color: var(--gray); font-size: .85rem; font-weight: 600;
+            text-decoration: none; padding: 7px 14px;
+            border-radius: 8px; transition: all .15s;
+        }
+        .nav-back:hover { background: var(--cream); color: var(--red-dark); }
+
+        /* ══ LAYOUT ══ */
+        .dash-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 48px; }
+
+        /* ══ PAGE HEADER ══ */
+        .page-header {
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 12px;
+            margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .page-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 3px; }
+        .page-sub   { color: var(--gray); font-size: .86rem; }
+        .btn-jual {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: var(--red); color: #fff; font-weight: 700;
+            font-size: .86rem; padding: 10px 20px; border-radius: 12px;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: background .15s, transform .15s; white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-jual:hover { background: var(--red-dark); transform: translateY(-1px); color: #fff; }
+        .btn-jual svg { width: 15px; height: 15px; stroke: #fff; fill: none; stroke-width: 2.5; }
+
+        /* ══ SUMMARY CARDS ══ */
+        .sum-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px; margin-bottom: 20px;
+        }
+        .sum-card {
+            background: var(--white); border-radius: var(--radius);
+            box-shadow: var(--shadow); padding: 18px 16px;
+            border: 1px solid #ebebeb;
+        }
+        .ci { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 12px; }
+        .ci-r { background: #FFF0F0; }
+        .ci-y { background: #FFFBEB; }
+        .ci-g { background: #F0FDF4; }
+        .ci-p { background: #F5F3FF; }
+        .c-label { font-size: .73rem; color: var(--gray); font-weight: 500; margin-bottom: 3px; }
+        .c-val   { font-size: 1.45rem; font-weight: 800; line-height: 1.1; margin-bottom: 4px; }
+        .c-sub   { font-size: .73rem; color: var(--gray); }
+        .c-sub.green { color: #16a34a; }
+
+        /* ══ CHARTS ROW ══ */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 290px;
+            gap: 14px; margin-bottom: 20px;
+        }
+        .ch-card {
+            background: var(--white); border-radius: var(--radius);
+            box-shadow: var(--shadow); border: 1px solid #ebebeb; padding: 18px 20px;
+        }
+        .ch-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .ch-title { font-weight: 700; font-size: .9rem; }
+        .ch-select {
+            background: #f7f8fa; border: 1px solid #ebebeb; border-radius: 8px;
+            padding: 5px 10px; font-size: .76rem; font-weight: 600;
+            color: var(--dark); cursor: pointer; outline: none; font-family: inherit;
+        }
+
+        /* Donut */
+        .donut-wrap { position: relative; width: 140px; height: 140px; margin: 0 auto 14px; }
+        .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+        .donut-center .dn { font-size: 1.55rem; font-weight: 800; line-height: 1; }
+        .donut-center .dl { font-size: .68rem; color: var(--gray); margin-top: 2px; }
+        .leg-list { list-style: none; padding: 0; margin: 0; }
+        .leg-list li { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: .8rem; }
+        .leg-list li:last-child { border-bottom: none; }
+        .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-right: 7px; }
+        .leg-name { display: flex; align-items: center; flex: 1; }
+        .leg-count { font-weight: 700; color: var(--gray); font-size: .78rem; }
+
+        /* ══ SEC CARD ══ */
+        .sec-card {
+            background: var(--white); border-radius: var(--radius);
+            box-shadow: var(--shadow); border: 1px solid #ebebeb;
+            padding: 18px 20px; margin-bottom: 20px;
+        }
+        .sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .sec-title { font-weight: 700; font-size: .9rem; }
+        .link-all { font-size: .8rem; color: var(--red); font-weight: 600; text-decoration: none; }
+        .link-all:hover { text-decoration: underline; }
+
+        /* ══ PRODUCT TABLE ══ */
+        .pt { width: 100%; border-collapse: collapse; }
+        .pt th { font-size: .7rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .04em; padding: 0 10px 10px; text-align: left; border-bottom: 1px solid #ebebeb; white-space: nowrap; }
+        .pt td { padding: 11px 10px; border-bottom: 1px solid #ebebeb; font-size: .84rem; vertical-align: middle; }
+        .pt tr:last-child td { border-bottom: none; }
+        .pt tbody tr:hover td { background: #fafafa; }
+        .p-img { width: 40px; height: 40px; border-radius: 9px; object-fit: cover; background: #f5f5f5; margin-right: 10px; flex-shrink: 0; }
+        .p-name { font-weight: 600; font-size: .855rem; line-height: 1.3; }
+        .p-cat  { color: var(--gray); font-size: .72rem; margin-top: 1px; }
+
+        /* Status badges */
+        .bs { display: inline-block; padding: 3px 9px; border-radius: 99px; font-size: .72rem; font-weight: 600; }
+        .bs-a { background: #F0FDF4; color: #16a34a; }
+        .bs-s { background: #FEF2F2; color: #dc2626; }
+        .bs-l { background: #FFFBEB; color: #d97706; }
+
+        /* Action buttons */
+        .act-btn { width: 29px; height: 29px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; background: #f5f5f5; border: 1px solid #ebebeb; cursor: pointer; transition: all .15s; text-decoration: none; color: var(--dark); }
+        .act-btn:hover { background: #e8e8e8; }
+        .act-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* ══ ORDER CARDS ══ */
+        .section-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #999; }
+        .product-card {
+            background: var(--white); border-radius: var(--radius);
+            padding: 14px 16px; margin-bottom: 12px;
+            box-shadow: var(--shadow); border: 1px solid #ebebeb;
+        }
+        .order-row {
+            background: #f8f8f8; border-radius: 10px;
+            padding: 12px 14px; margin-top: 10px;
+        }
+        .status-pill { font-size: .74rem; padding: 4px 10px; border-radius: 99px; font-weight: 600; display: inline-block; }
+        .pill-waiting  { background: #fff3cd; color: #856404; }
+        .pill-paid     { background: #cff4fc; color: #055160; }
+        .pill-pickup   { background: #cfe2ff; color: #084298; }
+        .pill-done     { background: #d1e7dd; color: #0a3622; }
+        .pill-cancel   { background: #f8d7da; color: #842029; }
+        .pill-available { background: #d1e7dd; color: #0a3622; }
+        .pill-locked   { background: #fff3cd; color: #856404; }
+        .pill-sold     { background: #f8d7da; color: #842029; }
+
+        /* ══ RESPONSIVE ══ */
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .charts-row { grid-template-columns: 1fr; }
+            .sum-grid   { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .nav-inner  { padding: 0 14px; }
+            .dash-wrap  { padding: 14px 12px 40px; }
+            .sum-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .c-val      { font-size: 1.25rem; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .btn-jual   { width: 100%; justify-content: center; }
+            .charts-row { grid-template-columns: 1fr; }
+            .ch-card    { padding: 14px 14px; }
+
+            /* Tabel: sembunyikan kolom Stok di mobile kecil */
+            .pt th:nth-child(3), .pt td:nth-child(3) { display: none; }
+
+            /* Order card mobile */
+            .product-card { padding: 12px; }
+            .order-row { padding: 10px 12px; }
+        }
+
+        /* Small mobile */
+        @media (max-width: 420px) {
+            .sum-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .ci { width: 36px; height: 36px; font-size: 1rem; }
+            .c-val { font-size: 1.15rem; }
+            .page-title { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR — hanya logo + kembali, TIDAK ada tombol jual ══ -->
+<nav class="topnav">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">
+            <img src="/static/logo.png" alt="ThriftIn Logo" onerror="this.style.display='none'">
+            <span class="nav-logo-text">thrift in.</span>
+        </a>
+        <a href="/home" class="nav-back">← Kembali</a>
+    </div>
+</nav>
+
+<!-- ══ KONTEN UTAMA ══ -->
+<div class="dash-wrap">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">Halo, {{ session.username }}! 👋</div>
+            <div class="page-sub">Yuk, kelola tokomu dan tingkatkan penjualan hari ini.</div>
+        </div>
+        <a href="/add" class="btn-jual">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Jual Produk
+        </a>
+    </div>
+
+    <!-- ══ SUMMARY CARDS ══ -->
+    {% set total_produk = items|length %}
+    {% set sold_count   = namespace(val=0) %}
+    {% set order_count  = namespace(val=0) %}
+    {% set revenue      = namespace(val=0) %}
+    {% for item in items %}
+        {% if item.product['status'] == 'sold' %}{% set sold_count.val = sold_count.val + 1 %}{% endif %}
+        {% for order in item.orders %}
+            {% set order_count.val = order_count.val + 1 %}
+            {% if order['status'] == 'Selesai' %}
+                {% set revenue.val = revenue.val + item.product['price'] %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+
+    <div class="sum-grid">
+        <div class="sum-card">
+            <div class="ci ci-r">🛍️</div>
+            <div class="c-label">Total Produk</div>
+            <div class="c-val">{{ total_produk }}</div>
+            <div class="c-sub green">● {{ items|length }} aktif</div>
+        </div>
+        <div class="sum-card">
+            <div class="ci ci-y">🛒</div>
+            <div class="c-label">Total Pesanan</div>
+            <div class="c-val">{{ order_count.val }}</div>
+            <div class="c-sub green">↑ semua pesanan masuk</div>
+        </div>
+        <div class="sum-card">
+            <div class="ci ci-g">💰</div>
+            <div class="c-label">Total Pendapatan</div>
+            <div class="c-val" style="font-size:{% if revenue.val >= 1000000 %}1rem{% else %}1.2rem{% endif %};">
+                Rp {{ "{:,}".format(revenue.val) }}
+            </div>
+            <div class="c-sub green">dari pesanan selesai</div>
+        </div>
+        <div class="sum-card">
+            <div class="ci ci-p">⭐</div>
+            <div class="c-label">Produk Terjual</div>
+            <div class="c-val">{{ sold_count.val }}</div>
+            <div class="c-sub">produk sudah sold</div>
+        </div>
+    </div>
+
+    <!-- ══ CHARTS ══ -->
+    <div class="charts-row">
+        <div class="ch-card">
+            <div class="ch-hd">
+                <span class="ch-title">Grafik Penjualan</span>
+                <select class="ch-select" id="chartFilter">
+                    <option value="30">30 Hari Terakhir</option>
+                    <option value="7">7 Hari Terakhir</option>
+                </select>
+            </div>
+            <canvas id="salesChart" height="110"></canvas>
+        </div>
+
+        <div class="ch-card">
+            <div class="ch-hd"><span class="ch-title">Ringkasan Kinerja</span></div>
+            <div class="donut-wrap">
+                <canvas id="donutChart"></canvas>
+                <div class="donut-center">
+                    <div class="dn">{{ total_produk }}</div>
+                    <div class="dl">Produk</div>
+                </div>
+            </div>
+            <ul class="leg-list" id="legList"></ul>
+        </div>
+    </div>
+
+    <!-- ══ TABEL PRODUK ══ -->
+    <div class="sec-card">
+        <div class="sec-hd">
+            <span class="sec-title">Produk Terbaru</span>
+            <a href="/add" class="link-all">+ Tambah →</a>
+        </div>
+
+        {% if items|length == 0 %}
+        <div style="text-align:center;padding:32px 16px;color:var(--gray);">
+            <div style="font-size:2.5rem;margin-bottom:12px;">📦</div>
+            <p style="font-weight:600;margin-bottom:12px;">Belum ada produk</p>
+            <a href="/add" style="background:var(--red);color:#fff;border-radius:10px;padding:10px 24px;font-weight:700;font-size:.86rem;text-decoration:none;">+ Tambah Produk Pertama</a>
+        </div>
+        {% else %}
+        <div style="overflow-x:auto;">
+        <table class="pt">
+            <thead>
+                <tr>
+                    <th>Produk</th>
+                    <th>Harga</th>
+                    <th>Stok</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;">
+                            <img class="p-img"
+                                 src="/static/uploads/{{ item.product['image'] }}"
+                                 onerror="this.src='https://placehold.co/40?text=?'"
+                                 alt="{{ item.product['title'] }}">
+                            <div>
+                                <div class="p-name">{{ item.product['title'][:32] }}{% if item.product['title']|length > 32 %}...{% endif %}</div>
+                                <div class="p-cat">{{ item.product['category'] or '' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="white-space:nowrap;">Rp {{ "{:,}".format(item.product['price']) }}</td>
+                    <td>{{ item.product['stock'] if item.product['stock'] is defined else '—' }}</td>
+                    <td>
+                        {% if item.product['status'] == 'available' %}
+                        <span class="bs bs-a">Tersedia</span>
+                        {% elif item.product['status'] == 'sold' %}
+                        <span class="bs bs-s">Terjual</span>
+                        {% else %}
+                        <span class="bs bs-l">Diproses</span>
+                        {% endif %}
+                    </td>
+                    <td style="white-space:nowrap;">
+                        <a href="/product/{{ item.product['id'] }}" class="act-btn" title="Lihat & Edit">
+                            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </a>
+                        <form method="POST" action="/product/{{ item.product['id'] }}/delete"
+                              style="display:inline;" onsubmit="return confirm('Yakin hapus produk ini?')">
+                            <button class="act-btn ms-1" title="Hapus" style="color:#dc2626;border-color:#fecaca;">
+                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ══ PESANAN MASUK ══ -->
+    <p class="section-label mb-3">Pesanan Masuk</p>
+
+    {% set ada_pesanan = namespace(val=false) %}
+    {% for item in items %}
+        {% if item.orders|length > 0 %}{% set ada_pesanan.val = true %}{% endif %}
+    {% endfor %}
+
+    {% if not ada_pesanan.val %}
+    <div style="text-align:center;padding:32px 16px;color:var(--gray);background:var(--white);border-radius:var(--radius);border:1px solid #ebebeb;">
+        <div style="font-size:2rem;margin-bottom:8px;">📭</div>
+        <p style="font-weight:600;">Belum ada pesanan masuk</p>
+    </div>
+    {% endif %}
+
+    {% for item in items %}
+        {% for order in item.orders %}
+        <div class="product-card">
+            <!-- Info produk -->
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">
+                <img src="/static/uploads/{{ item.product['image'] }}"
+                     style="width:52px;height:52px;object-fit:cover;border-radius:10px;flex-shrink:0;"
+                     onerror="this.src='https://placehold.co/52?text=?'">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.product['title'] }}</div>
+                    <div style="font-size:.85rem;color:var(--red);font-weight:700;">Rp {{ "{:,}".format(item.product['price']) }}</div>
+                </div>
+                <span class="status-pill {% if item.product['status'] == 'available' %}pill-available{% elif item.product['status'] == 'locked' %}pill-locked{% else %}pill-sold{% endif %}" style="flex-shrink:0;">
+                    {% if item.product['status'] == 'available' %}Tersedia{% elif item.product['status'] == 'locked' %}Diproses{% else %}Terjual{% endif %}
+                </span>
+            </div>
+
+            <!-- Detail order -->
+            <div class="order-row">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                    <div>
+                        <div style="font-weight:600;font-size:.86rem;margin-bottom:2px;">Pesanan #{{ order['id'] }}</div>
+                        <div style="color:var(--gray);font-size:.76rem;margin-bottom:6px;">
+                            {{ order['payment_method'] }} · {{ order['pickup_method'] }}
+                            {% if order['schedule'] %} · {{ order['schedule'][:10] }}{% endif %}
+                        </div>
+                        <span class="status-pill
+                            {% if order['status'] == 'Menunggu Pembayaran' %}pill-waiting
+                            {% elif order['status'] == 'Dibayar' %}pill-paid
+                            {% elif order['status'] == 'Menunggu Pengambilan' %}pill-pickup
+                            {% elif order['status'] == 'Selesai' %}pill-done
+                            {% else %}pill-cancel{% endif %}">
+                            {{ order['status'] }}
+                        </span>
+                    </div>
+                    {% if order['payment_proof'] %}
+                    <img src="/static/uploads/{{ order['payment_proof'] }}"
+                         style="width:46px;height:46px;object-fit:cover;border-radius:8px;flex-shrink:0;"
+                         alt="bukti bayar">
+                    {% endif %}
+                </div>
+
+                <!-- Tombol aksi order — full width di mobile -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Chat selalu paling kiri -->
+                    <a href="/chat/{{ item.product['id'] }}" class="btn btn-outline-success btn-sm">💬 Chat</a>
+                    {% if order['status'] == 'Menunggu Pengambilan' %}
+                    <form method="POST" action="/order/{{ order['id'] }}/confirm">
+                        <input type="hidden" name="status" value="Selesai">
+                        <button class="btn btn-success btn-sm fw-semibold">Tandai Selesai</button>
+                    </form>
+                    {% endif %}
+                    {% if order['status'] not in ['Selesai', 'Dibatalkan'] %}
+                    <form method="POST" action="/order/{{ order['id'] }}/confirm">
+                        <input type="hidden" name="status" value="Dibatalkan">
+                        <button class="btn btn-outline-danger btn-sm">Batalkan</button>
+                    </form>
+                    {% endif %}
+                    <!-- Konfirmasi selalu paling kanan -->
+                    {% if order['status'] == 'Dibayar' %}
+                    <form method="POST" action="/order/{{ order['id'] }}/confirm">
+                        <input type="hidden" name="status" value="Menunggu Pengambilan">
+                        <button class="btn btn-primary btn-sm fw-semibold">✅ Konfirmasi Bayar</button>
+                    </form>
+                    {% endif %}
+                    {% if order['status'] == 'Menunggu Pembayaran' and order['payment_method'] == 'COD' %}
+                    <form method="POST" action="/order/{{ order['id'] }}/confirm">
+                        <input type="hidden" name="status" value="Menunggu Pengambilan">
+                        <button class="btn btn-primary btn-sm fw-semibold">✅ Konfirmasi COD</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endfor %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+<script>
+const produkData = [
+    {% for item in items %}
+    {
+        title:  {{ item.product['title']|tojson }},
+        status: {{ item.product['status']|tojson }},
+        price:  {{ item.product['price'] }},
+        orders: [
+            {% for order in item.orders %}
+            { status: {{ order['status']|tojson }}, created_at: {{ order['created_at']|tojson if order['created_at'] else '""' }} },
+            {% endfor %}
+        ]
+    },
+    {% endfor %}
+];
+
+/* ── Donut Chart ── */
+const avail  = produkData.filter(p => p.status === 'available').length;
+const sold   = produkData.filter(p => p.status === 'sold').length;
+const locked = produkData.filter(p => p.status === 'locked').length;
+const total  = produkData.length;
+
+new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Tersedia','Terjual','Diproses'],
+        datasets: [{ data: [avail, sold, locked], backgroundColor: ['#16a34a','#dc2626','#d97706'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: { cutout: '70%', responsive: true, plugins: { legend: { display: false } } }
+});
+
+const colors = ['#16a34a','#dc2626','#d97706'];
+const counts = [avail, sold, locked];
+const names  = ['Tersedia','Terjual','Diproses'];
+document.getElementById('legList').innerHTML = names.map((n,i) =>
+    `<li><span class="leg-name"><span class="leg-dot" style="background:${colors[i]}"></span>${n}</span><span class="leg-count">${counts[i]} (${total ? ((counts[i]/total)*100).toFixed(1) : 0}%)</span></li>`
+).join('');
+
+/* ── Line Chart ── */
+function buildChartData(days) {
+    const today = new Date();
+    const labels = [], values = [];
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key   = d.toISOString().split('T')[0];
+        const label = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        labels.push(label);
+        let dayTotal = 0;
+        produkData.forEach(prod => {
+            prod.orders.forEach(ord => {
+                if (ord.status === 'Selesai' && ord.created_at && ord.created_at.startsWith(key)) dayTotal += prod.price;
+            });
+        });
+        values.push(dayTotal);
+    }
+    return { labels, values };
+}
+
+let salesInst = null;
+function renderSales(days) {
+    const { labels, values } = buildChartData(days);
+    if (salesInst) salesInst.destroy();
+    salesInst = new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Pendapatan', data: values,
+                borderColor: '#7B1113', backgroundColor: 'rgba(123,17,19,.08)',
+                borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#7B1113', tension: 0.4, fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff', titleColor: '#1a1a1a',
+                    bodyColor: '#6b7280', borderColor: '#ebebeb', borderWidth: 1, padding: 10,
+                    callbacks: { label: ctx => 'Rp ' + Number(ctx.raw).toLocaleString('id-ID') }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af', maxTicksLimit: 7 } },
+                y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v >= 1e6 ? (v/1e6)+'M' : v >= 1e3 ? (v/1e3)+'K' : v } }
+            }
+        }
+    });
+}
+renderSales(30);
+document.getElementById('chartFilter').addEventListener('change', function() { renderSales(parseInt(this.value)); });
+
+/* ── Realtime notif ── */
+const socket   = io();
+const sellerId = {{ session.user_id }};
+socket.emit('join_seller', { seller_id: sellerId });
+
+function showNotif(color, title, msg, link) {
+    const el = document.createElement('div');
+    el.className = `alert alert-${color} alert-dismissible fade show`;
+    el.style = 'position:fixed;top:68px;right:16px;z-index:9999;min-width:280px;max-width:90vw;box-shadow:0 4px 16px rgba(0,0,0,.15);border-radius:12px;font-size:.88rem;';
+    el.innerHTML = `<strong>${title}</strong><br>${msg}<a href="${link}" class="alert-link d-block mt-1">Lihat →</a><button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 8000);
+}
+
+socket.on('order_notification', d => showNotif('success', 'Pesanan Baru!',  d.message, `/order/${d.order_id}`));
+socket.on('chat_notification',  d => showNotif('primary',  'Pesan Baru!',   d.message, `/chat/${d.product_id}`));
+</script>
+</body>
+</html>
