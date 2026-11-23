@@ -1,4 +1,5 @@
 import sqlite3
+from werkzeug.security import generate_password_hash
 
 conn = sqlite3.connect('thrift.db')
 conn.row_factory = sqlite3.Row
@@ -19,7 +20,8 @@ users = [
     ('rizky_seller', 'rizky@student.gunadarma.ac.id', 'password123'),
 ]
 for u in users:
-    conn.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', u)
+    conn.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+                 (u[0], u[1], generate_password_hash(u[2])))
 conn.commit()
 
 budi_id  = conn.execute("SELECT id FROM users WHERE username='budi_thrift'").fetchone()['id']

@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_socketio import SocketIO, emit, join_room
 from database import get_db, init_db
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'thriftin_secret_key'
@@ -53,8 +54,9 @@ def register():
         if existing:
             db.close()
             return render_template('register.html', error='Username sudah dipakai.')
+        hashed = generate_password_hash(password)
         db.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-                   (username, email, password))
+                    (username, email, hashed))
         db.commit()
         db.close()
         return redirect(url_for('login'))
@@ -66,10 +68,10 @@ def login():
         username = request.form['username'].strip()
         password = request.form['password']
         db = get_db()
-        user = db.execute('SELECT * FROM users WHERE username = ? AND password = ?',
-                          (username, password)).fetchone()
+        user = db.execute('SELECT * FROM users WHERE username = ?',
+                  (username,)).fetchone()
         db.close()
-        if user:
+        if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
             session['avatar'] = user['avatar'] if 'avatar' in user.keys() else ''
@@ -526,13 +528,13 @@ def settings():
         elif action == 'password':
             old_pass = request.form.get('old_password', '')
             new_pass = request.form.get('new_password', '')
-            if user['password'] != old_pass:
+            if not check_password_hash(user['password'], old_pass):
                 error = 'Password lama salah.'
             elif len(new_pass) < 6:
                 error = 'Password baru minimal 6 karakter.'
             else:
                 db.execute('UPDATE users SET password = ? WHERE id = ?',
-                           (new_pass, session['user_id']))
+                        (generate_password_hash(new_pass), session['user_id']))
                 db.commit()
                 success = 'Password berhasil diubah!'
 
