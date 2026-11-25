@@ -237,6 +237,13 @@
             font-size: 0.79rem; font-weight: 600;
             cursor: pointer; text-decoration: none;
         }
+                .page-num {
+            background: white; color: #8B1A1A;
+            border: 1.5px solid #8B1A1A; border-radius: 8px;
+            padding: 6px 12px; font-size: 0.85rem; font-weight: 700;
+            text-decoration: none;
+        }
+        .page-num:hover { background: #fff0f0; }
         .result-count {
             color: rgba(255,255,255,0.85); font-size: 0.78rem;
             margin-left: auto; white-space: nowrap; font-weight: 600;
@@ -505,7 +512,7 @@
         <button class="filter-toggle-btn" id="filterToggleBtn"
                 onclick="toggleFilter()">
             <span id="filterBtnLabel">🔽 Filter &amp; Urutkan</span>
-            <span style="font-size:0.76rem;opacity:0.8;">{{ products|length }} produk</span>
+            <span style="font-size:0.76rem;opacity:0.8;">{{ total }} produk</span>
         </button>
 
         <!-- Panel filter -->
@@ -591,7 +598,7 @@
                         <button type="submit" class="btn-filter-red">Filter</button>
                         <a href="/home" class="btn-reset-red">Reset</a>
                     </div>
-                    <span class="result-count">{{ products|length }} produk</span>
+                    <span class="result-count">{{ total }} produk</span>
                 </div>
             </form>
         </div>
@@ -608,7 +615,7 @@
                 {% elif selected_location %}{{ selected_location }}
                 {% else %}Semua Produk{% endif %}
             </strong>
-            <span>{{ products|length }} item</span>
+            <span>{{ total }} item</span>
         </div>
 
         <div class="product-grid">
@@ -706,6 +713,24 @@
         {% endfor %}
         {% endif %}
         </div>
+                {% if total_pages > 1 %}
+        {% set qs = '&category=' ~ (selected_category|urlencode) ~ '&location=' ~ (selected_location|urlencode) ~ '&min_price=' ~ min_price ~ '&max_price=' ~ max_price ~ '&sort=' ~ sort %}
+        <div style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:24px 0;">
+            {% if page > 1 %}
+            <a href="/home?page={{ page - 1 }}{{ qs }}" class="page-num">&laquo;</a>
+            {% endif %}
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                <span style="background:#8B1A1A;color:white;border-radius:8px;padding:6px 12px;font-weight:700;font-size:0.85rem;">{{ p }}</span>
+                {% else %}
+                <a href="/home?page={{ p }}{{ qs }}" class="page-num">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page < total_pages %}
+            <a href="/home?page={{ page + 1 }}{{ qs }}" class="page-num">&raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </div>
 

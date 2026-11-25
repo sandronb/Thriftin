@@ -122,8 +122,20 @@ def home():
     else:
         query += ' ORDER BY created_at DESC'
 
-    products = db.execute(query, params).fetchall()
+    per_page = 8
+    try:
+        page = max(1, int(request.args.get('page', 1)))
+    except ValueError:
+        page = 1
 
+    total = db.execute(query.replace('SELECT *', 'SELECT COUNT(*)', 1).split(' ORDER BY')[0],
+                    params).fetchone()[0]
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    page = min(page, total_pages)
+
+    query += ' LIMIT ? OFFSET ?'
+    products = db.execute(query, params + [per_page, (page - 1) * per_page]).fetchall()
+    
     wishlist_ids = []
     if 'user_id' in session:
         rows = db.execute('SELECT product_id FROM wishlist WHERE user_id = ?',
@@ -138,7 +150,10 @@ def home():
                            min_price=min_price,
                            max_price=max_price,
                            sort=sort,
-                           wishlist_ids=wishlist_ids)
+                           wishlist_ids=wishlist_ids,
+                           page=page,
+                           total_pages=total_pages,
+                           total=total,)
 
 # ─── SEARCH ─────────────────────────────────────────
 
