@@ -487,13 +487,30 @@ def submit_review(username):
     db     = get_db()
     seller = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
     if seller and seller['id'] != session['user_id']:
-        rating  = int(request.form.get('rating', 5))
+        try:
+            rating = int(request.form.get('rating', 5))
+        except ValueError:
+            rating = 0
         comment = request.form.get('comment', '').strip()
-        db.execute('''
-            INSERT INTO reviews (reviewer_id, seller_id, product_id, rating, comment)
-            VALUES (?, ?, 0, ?, ?)
-        ''', (session['user_id'], seller['id'], rating, comment))
-        db.commit()
+
+        pernah_beli = db.execute('''
+            SELECT COUNT(*) FROM orders
+            JOIN products ON orders.product_id = products.id
+            WHERE orders.buyer_id = ? AND products.user_id = ?
+              AND orders.status = 'Selesai'
+        ''', (session['user_id'], seller['id'])).fetchone()[0]
+
+        sudah_ulas = db.execute(
+            'SELECT COUNT(*) FROM reviews WHERE reviewer_id = ? AND seller_id = ?',
+            (session['user_id'], seller['id'])
+        ).fetchone()[0]
+
+        if 1 <= rating <= 5 and pernah_beli > 0 and sudah_ulas == 0:
+            db.execute('''
+                INSERT INTO reviews (reviewer_id, seller_id, product_id, rating, comment)
+                VALUES (?, ?, 0, ?, ?)
+            ''', (session['user_id'], seller['id'], rating, comment))
+            db.commit()
     db.close()
     return redirect(url_for('seller_profile', username=username))
 
