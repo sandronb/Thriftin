@@ -12,7 +12,7 @@ app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 socketio = SocketIO(app)
 
 # Track user online
-online_users = set()
+online_users = {}
 
 with app.app_context():
     init_db()
@@ -83,7 +83,7 @@ def login():
 def logout():
     uid = session.get('user_id')
     if uid:
-        online_users.discard(uid)
+        online_users.pop(uid, None)
         socketio.emit('seller_status', {'seller_id': uid, 'online': False}, namespace='/')
     session.clear()
     return redirect(url_for('index'))
@@ -708,15 +708,16 @@ def on_join_seller(data):
 def on_user_online(data):
     user_id = data.get('user_id', 0)
     if user_id:
-        online_users.add(user_id)
+        online_users.setdefault(user_id, set()).add(request.sid)
         socketio.emit('seller_status', {'seller_id': user_id, 'online': True})
 
 @socketio.on('disconnect')
 def on_disconnect():
-    uid = session.get('user_id')
-    if uid and uid in online_users:
-        online_users.discard(uid)
-        socketio.emit('seller_status', {'seller_id': uid, 'online': False})
+    for uid in list(online_users):
+        online_users[uid].discard(request.sid)
+        if not online_users[uid]:
+            del online_users[uid]
+            socketio.emit('seller_status', {'seller_id': uid, 'online': False})
 
 @socketio.on('send_message')
 def handle_message(data):
