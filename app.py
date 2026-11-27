@@ -296,7 +296,7 @@ def update_stock(id):
 def checkout(id):
     db      = get_db()
     product = db.execute('SELECT * FROM products WHERE id = ?', (id,)).fetchone()
-    if product is None or product['status'] != 'available':
+    if product is None or product['status'] != 'available' or product['user_id'] == session['user_id']:
         db.close()
         return redirect(url_for('home'))
 
@@ -338,6 +338,9 @@ def checkout(id):
 def order_detail(order_id):
     db      = get_db()
     order   = db.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    if order is None:
+        db.close()
+        return redirect(url_for('home'))
     product = db.execute('SELECT * FROM products WHERE id = ?',
                          (order['product_id'],)).fetchone()
     db.close()
@@ -368,6 +371,16 @@ def confirm_order(order_id):
     status = request.form['status']
     db     = get_db()
     order  = db.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    penjual = None
+    if order:
+        penjual = db.execute('SELECT user_id FROM products WHERE id = ?',
+                             (order['product_id'],)).fetchone()
+    boleh = (order is not None and penjual is not None and
+             session['user_id'] in (order['buyer_id'], penjual['user_id']) and
+             status in ('Menunggu Pengambilan', 'Selesai', 'Dibatalkan'))
+    if not boleh:
+        db.close()
+        return redirect(url_for('home'))
     db.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
 
     if status == 'Selesai':
